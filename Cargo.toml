@@ -1,7 +1,7 @@
 [package]
 name = "sheller"
-description = "Sheller is shell command builder library written in Rust."
-version = "0.0.1"
+description = "🐚 Sheller is a shell command builder library written in Rust."
+version = "0.0.2"
 edition = "2021"
 license = "MIT"
 readme = "README.md"
