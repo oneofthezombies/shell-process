@@ -1,2 +1,3 @@
-# shell-process
-Multi-platform shell process command creation and tree-kill utility library written in Rust.
+# Sheller
+
+🐚 Sheller is shell command builder library written in Rust.  
