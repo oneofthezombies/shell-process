@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -e
+
+echo cargo run --package tool-dev -- pre-push
+cargo run --package tool-dev -- pre-push
