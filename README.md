@@ -65,3 +65,11 @@ Add `sheller` to your dependencies.
 [dependencies]
 sheller = "0.1"
 ```
+
+Below is an example of calling `npm install`.
+
+```rust
+use sheller::Sheller;
+
+let sheller
+```

@@ -6,8 +6,7 @@ mod tests {
     #[test]
     #[cfg(windows)]
     fn default_windows() {
-        let sheller = Sheller::new("echo hello");
-        let command = sheller.build();
+        let command = Sheller::new("echo hello").build();
         let program = command.get_program().to_str().unwrap();
         let file_name = Path::new(program).file_name().unwrap().to_str().unwrap();
         assert_eq!(file_name, "cmd.exe");
