@@ -84,7 +84,8 @@ use sheller::debug::sh;
 sh("npm install");
 ```
 
-This feature is only available when `debug_assertions` is enabled.  
+⚠️ This feature is only available when `debug_assertions` is enabled.  
+
 I designed it this way to use it as a development environment utility.  
 As shown below, it it a simple implementation for development utility rather than for manipulating various functions.  
 The reason it it not implemented as a macro is because it can also be implemented as a function.  
