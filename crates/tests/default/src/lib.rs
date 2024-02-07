@@ -28,7 +28,7 @@ mod tests {
     }
 
     #[test]
-    fn sh() {
+    fn call_sh() {
         use sheller::debug::sh;
         sh("echo hello");
     }
