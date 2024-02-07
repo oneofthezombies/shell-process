@@ -86,7 +86,9 @@ impl<'a> Sheller<'a> {
     ///
     /// ```
     /// use sheller::Sheller;
-    /// let sheller = Sheller::new("echo hello");
+    ///
+    /// let mut command = Sheller::new("echo hello").build();
+    /// assert!(command.status().unwrap().success());
     /// ```
     #[must_use]
     pub fn new(script: &'a str) -> Self {
@@ -102,8 +104,9 @@ impl<'a> Sheller<'a> {
     ///
     /// ```
     /// use sheller::Sheller;
-    /// let sheller = Sheller::new("echo hello");
-    /// let command = sheller.build();
+    ///
+    /// let mut command = Sheller::new("echo hello").build();
+    /// assert!(command.status().unwrap().success());
     /// ```
     #[must_use]
     pub fn build(self) -> process::Command {

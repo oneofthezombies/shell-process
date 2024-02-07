@@ -66,10 +66,53 @@ Add `sheller` to your dependencies.
 sheller = "0.1"
 ```
 
-Below is an example of calling `npm install`.
+Below is an example of calling `npm install` using builder.  
+It is each to further manipulate the stdout, stderr, and current working directory of the returned `std::process::Command`.
 
 ```rust
 use sheller::Sheller;
 
-let sheller
+let mut command = Sheller::new("npm install").build();
+assert!(command.status().unwrap().success());
 ```
+
+Below is an example of calling `npm install` using utility function.  
+
+```rust
+use sheller::debug::sh;
+
+sh("npm install");
+```
+
+This feature is only available when `debug_assertions` is enabled.  
+I designed it this way to use it as a development environment utility.  
+As shown below, it it a simple implementation for development utility rather than for manipulating various functions.  
+The reason it it not implemented as a macro is because it can also be implemented as a function.  
+I think that when the implementation I want to express cannot be implemented as a function but only as a macro, it it better to implement it as a macro.  
+Because macros are quite difficult to read, even when read with the aid of modern developer tools.  
+
+```rust
+pub fn sh(script: &str) {
+    let mut command = Sheller::new(script).build();
+    assert!(command
+        .stdout(process::Stdio::inherit())
+        .stderr(process::Stdio::inherit())
+        .status()
+        .unwrap()
+        .success());
+}
+```
+
+## Internal Implementation
+
+### Windows  
+
+When `target_family` is `windows`.  
+Set the `COMSPEC` environment variable to `program`, and if the environment variable is not set, use `cmd.exe` as the fallback program.  
+Also set the `args` to `["/D", "/S", "/C"]`.  
+
+### Unix
+
+When `target_family` is `unix`.  
+Set the `SHELL` environment variable to program, and if the environment variable is not set, use `/bin/sh` as the fallback program.  
+Also set the `args` to `["-c"]`.
