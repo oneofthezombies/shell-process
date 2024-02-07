@@ -5,7 +5,7 @@ mod tests {
     #[test]
     #[cfg(windows)]
     fn env_shell_windows() {
-        use std::{env, ffi::OsStr, process};
+        use std::env;
 
         let default_shell = env::var("COMSPEC").unwrap();
         assert_eq!(default_shell, "C:\\WINDOWS\\system32\\cmd.exe");
