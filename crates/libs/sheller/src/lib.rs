@@ -38,6 +38,7 @@ fn parse_program() -> String {
 pub struct Sheller<'a> {
     program: String,
     args: Vec<&'a str>,
+    script: &'a str,
 }
 
 impl Default for Sheller<'_> {
@@ -45,30 +46,25 @@ impl Default for Sheller<'_> {
         Self {
             program: parse_program(),
             args: DEFAULT_METADATA.args.to_vec(),
+            script: "",
         }
     }
 }
 
 impl<'a> Sheller<'a> {
     #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn arg(&mut self, arg: &'a str) -> &mut Self {
-        self.args.push(arg);
-        self
-    }
-
-    pub fn args(&mut self, args: &'a [&'a str]) -> &mut Self {
-        self.args.extend_from_slice(args);
-        self
+    pub fn new(script: &'a str) -> Self {
+        Self {
+            script,
+            ..Self::default()
+        }
     }
 
     #[must_use]
     pub fn build(self) -> process::Command {
         let mut command = process::Command::new(self.program);
         command.args(self.args);
+        command.arg(self.script);
         command
     }
 }
