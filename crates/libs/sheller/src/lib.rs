@@ -42,21 +42,16 @@ pub struct Sheller<'a> {
 
 impl Default for Sheller<'_> {
     fn default() -> Self {
-        let program = parse_program();
         Self {
-            program,
-            args: DEFAULT_METADATA.args.to_vec(),
+            program: parse_program(),
+            args: Vec::new(),
         }
     }
 }
 
 impl<'a> Sheller<'a> {
     pub fn new() -> Sheller<'a> {
-        let program = parse_program();
-        Sheller {
-            program,
-            args: DEFAULT_METADATA.args.to_vec(),
-        }
+        Self::default()
     }
 
     pub fn arg(&mut self, arg: &'a str) {
