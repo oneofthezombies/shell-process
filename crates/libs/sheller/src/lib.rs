@@ -70,7 +70,7 @@ impl<'a> Sheller<'a> {
 }
 
 #[macro_export]
-macro_rules! shell {
+macro_rules! sh {
     ($script:expr) => {
         $crate::Sheller::new($script).build()
     };

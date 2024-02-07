@@ -1,12 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use sheller::{shell, Sheller};
+    use sheller::{sh, Sheller};
+    use std::{ffi::OsStr, path::Path};
 
     #[test]
     #[cfg(windows)]
     fn default_windows() {
-        use std::{ffi::OsStr, path::Path};
-
         let sheller = Sheller::new();
         let command = sheller.build();
         let program = command.get_program().to_str().unwrap();
@@ -19,8 +18,6 @@ mod tests {
     #[test]
     #[cfg(unix)]
     fn default_unix() {
-        use std::{ffi::OsStr, path::Path};
-
         let sheller = Sheller::new("echo hello");
         let command = sheller.build();
         let program = command.get_program().to_str().unwrap();
@@ -34,7 +31,7 @@ mod tests {
     fn macro_expect() {
         let sheller = Sheller::new("echo hello");
         let command1 = sheller.build();
-        let command2 = shell!("echo hello");
+        let command2 = sh!("echo hello");
         assert_eq!(command1.get_program(), command2.get_program());
         assert_eq!(
             command1.get_args().collect::<Vec<_>>(),
