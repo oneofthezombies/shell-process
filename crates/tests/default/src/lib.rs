@@ -28,7 +28,11 @@ mod tests {
     #[cfg(target_os = "linux")]
     fn env_shell_linux() {
         let default_shell = env::var("SHELL").unwrap();
-        assert_eq!(default_shell, "/bin/sh");
+        let expected_shell = match env::var("GITHUB_ACTIONS") {
+            Ok(_) => "/bin/sh",
+            Err(_) => "/bin/bash",
+        };
+        assert_eq!(default_shell, expected_shell);
     }
 
     #[test]
