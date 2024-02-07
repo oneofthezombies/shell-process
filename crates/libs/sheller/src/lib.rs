@@ -44,7 +44,7 @@ impl Default for Sheller<'_> {
     fn default() -> Self {
         Self {
             program: parse_program(),
-            args: Vec::new(),
+            args: DEFAULT_METADATA.args.to_vec(),
         }
     }
 }
