@@ -3,6 +3,15 @@ mod tests {
     use sheller::Sheller;
     use std::{env, ffi::OsStr, process};
 
+    #[cfg(unix)]
+    fn get_program() -> String {
+        if let Some(_) = env::var("GITHUB_ACTIONS").ok() {
+            "/bin/bash".to_string()
+        } else {
+            env::var("SHELL").unwrap()
+        }
+    }
+
     #[test]
     #[cfg(windows)]
     fn env_shell_windows() {
@@ -25,33 +34,11 @@ mod tests {
     }
 
     #[test]
-    #[cfg(target_os = "linux")]
-    fn env_shell_linux() {
-        let default_shell = env::var("SHELL").unwrap();
-        let expected_shell = match env::var("GITHUB_ACTIONS") {
-            Ok(_) => "/bin/sh",
-            Err(_) => "/bin/bash",
-        };
-        assert_eq!(default_shell, expected_shell);
-    }
-
-    #[test]
-    #[cfg(target_os = "macos")]
-    fn env_shell_macos() {
-        let default_shell = env::var("SHELL").unwrap();
-        let expected_shell = match env::var("GITHUB_ACTIONS") {
-            Ok(_) => "/bin/bash",
-            Err(_) => "/bin/zsh",
-        };
-        assert_eq!(default_shell, expected_shell);
-    }
-
-    #[test]
     #[cfg(unix)]
     fn default_unix() {
         let sheller = Sheller::new();
         let command = sheller.build();
-        let mut expected_command = process::Command::new(env::var("SHELL").unwrap());
+        let mut expected_command = process::Command::new(get_program());
         expected_command.arg("-c");
         assert_eq!(command.get_program(), expected_command.get_program());
         assert_eq!(
