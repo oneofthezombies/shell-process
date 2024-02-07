@@ -68,3 +68,10 @@ impl<'a> Sheller<'a> {
         command
     }
 }
+
+#[macro_export]
+macro_rules! shell {
+    ($script:expr) => {
+        $crate::Sheller::new($script).build()
+    };
+}
