@@ -1,6 +1,10 @@
 use crate::Sheller;
 use std::process;
 
+/// Run a shell command.
+///
+/// # Panics
+/// Panics if the command fails.
 pub fn sh(script: &str) {
     let mut command = Sheller::new(script).build();
     command
