@@ -63,6 +63,7 @@ impl<'a> Sheller<'a> {
         self.args.extend_from_slice(args);
     }
 
+    #[must_use]
     pub fn build(self) -> process::Command {
         let mut command = process::Command::new(self.program);
         command.args(self.args);
