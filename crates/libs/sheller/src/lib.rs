@@ -51,16 +51,18 @@ impl Default for Sheller<'_> {
 
 impl<'a> Sheller<'a> {
     #[must_use]
-    pub fn new() -> Sheller<'a> {
+    pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn arg(&mut self, arg: &'a str) {
+    pub fn arg(&mut self, arg: &'a str) -> &mut Self {
         self.args.push(arg);
+        self
     }
 
-    pub fn args(&mut self, args: &'a [&'a str]) {
+    pub fn args(&mut self, args: &'a [&'a str]) -> &mut Self {
         self.args.extend_from_slice(args);
+        self
     }
 
     #[must_use]
