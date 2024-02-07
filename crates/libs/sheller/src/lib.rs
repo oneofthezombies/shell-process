@@ -37,6 +37,9 @@ fn parse_program() -> String {
     })
 }
 
+/// Sheller is a builder for `std::process::Command` that sets the shell program and arguments.
+///
+/// Please see the `Sheller::new` method for more information.
 #[derive(Debug)]
 pub struct Sheller<'a> {
     program: String,
@@ -55,6 +58,36 @@ impl Default for Sheller<'_> {
 }
 
 impl<'a> Sheller<'a> {
+    /// Create a new `Sheller` with the given `script` and platform-specific defaults.
+    ///
+    /// # Platform-specific defaults
+    ///
+    /// ## Windows
+    ///
+    /// When `target_family` is `windows`.
+    ///
+    /// Set the `COMSPEC` environment variable to `program`, and if the environment variable is not set, use `cmd.exe` as the fallback program.
+    ///
+    /// Also set the `args` to `["/D", "/S", "/C"]`.
+    ///
+    /// ## Unix
+    ///
+    /// When `target_family` is `unix`.
+    ///
+    /// Set the `SHELL` environment variable to `program`, and if the environment variable is not set, use `/bin/sh` as the fallback program.
+    ///
+    /// Also set the `args` to `["-c"]`.
+    ///
+    /// # Arguments
+    ///
+    /// * `script` - The shell script to run. This is dependent on the shell program.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use sheller::Sheller;
+    /// let sheller = Sheller::new("echo hello");
+    /// ```
     #[must_use]
     pub fn new(script: &'a str) -> Self {
         Self {
@@ -63,6 +96,15 @@ impl<'a> Sheller<'a> {
         }
     }
 
+    /// Returns `std::process::Command` with the shell program and arguments set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use sheller::Sheller;
+    /// let sheller = Sheller::new("echo hello");
+    /// let command = sheller.build();
+    /// ```
     #[must_use]
     pub fn build(self) -> process::Command {
         let mut command = process::Command::new(&self.program);

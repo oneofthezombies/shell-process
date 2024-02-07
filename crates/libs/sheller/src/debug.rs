@@ -1,7 +1,7 @@
 use crate::Sheller;
 use std::process;
 
-/// Run a shell command.
+/// Run a shell script.
 ///
 /// # Panics
 /// Panics if the command fails.
