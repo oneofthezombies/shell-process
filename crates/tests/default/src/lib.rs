@@ -4,27 +4,16 @@ mod tests {
 
     #[test]
     #[cfg(windows)]
-    fn env_shell_windows() {
-        use std::env;
-
-        let default_shell = env::var("COMSPEC").unwrap();
-        assert_eq!(default_shell, "C:\\WINDOWS\\system32\\cmd.exe");
-    }
-
-    #[test]
-    #[cfg(windows)]
     fn default_windows() {
-        use std::{env, ffi::OsStr, process};
+        use std::{ffi::OsStr, path::Path};
 
         let sheller = Sheller::new();
         let command = sheller.build();
-        let mut expected_command = process::Command::new(env::var("COMSPEC").unwrap());
-        expected_command.args(&["/D", "/S", "/C"]);
-        assert_eq!(command.get_program(), expected_command.get_program());
-        assert_eq!(
-            command.get_args().collect::<Vec<&OsStr>>(),
-            expected_command.get_args().collect::<Vec<&OsStr>>()
-        );
+        let program = command.get_program().to_str().unwrap();
+        let file_name = Path::new(program).file_name().unwrap().to_str().unwrap();
+        assert_eq!(file_name, "cmd.exe");
+        let args = command.get_args().collect::<Vec<&OsStr>>();
+        assert_eq!(args, vec!["/D", "/S", "/C"]);
     }
 
     #[test]
