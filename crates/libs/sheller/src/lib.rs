@@ -50,6 +50,7 @@ impl Default for Sheller<'_> {
 }
 
 impl<'a> Sheller<'a> {
+    #[must_use]
     pub fn new() -> Sheller<'a> {
         Self::default()
     }
