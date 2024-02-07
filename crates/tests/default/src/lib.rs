@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use sheller::{sh, Sheller};
+    use sheller::Sheller;
     use std::{ffi::OsStr, path::Path};
 
     #[test]
@@ -28,14 +28,8 @@ mod tests {
     }
 
     #[test]
-    fn macro_expect() {
-        let sheller = Sheller::new("echo hello");
-        let command1 = sheller.build();
-        let command2 = sh!("echo hello");
-        assert_eq!(command1.get_program(), command2.get_program());
-        assert_eq!(
-            command1.get_args().collect::<Vec<_>>(),
-            command2.get_args().collect::<Vec<_>>()
-        );
+    fn sh() {
+        use sheller::debug::sh;
+        sh("echo hello");
     }
 }

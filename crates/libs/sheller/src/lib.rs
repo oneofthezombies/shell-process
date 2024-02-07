@@ -1,6 +1,9 @@
 use std::{env, process};
 use tracing::debug;
 
+#[cfg(debug_assertions)]
+pub mod debug;
+
 #[derive(Debug)]
 struct Metadata<'a> {
     env_key: &'a str,
@@ -56,22 +59,15 @@ impl<'a> Sheller<'a> {
     pub fn new(script: &'a str) -> Self {
         Self {
             script,
-            ..Self::default()
+            ..Default::default()
         }
     }
 
     #[must_use]
     pub fn build(self) -> process::Command {
-        let mut command = process::Command::new(self.program);
-        command.args(self.args);
+        let mut command = process::Command::new(&self.program);
+        command.args(&self.args);
         command.arg(self.script);
         command
     }
-}
-
-#[macro_export]
-macro_rules! sh {
-    ($script:expr) => {
-        $crate::Sheller::new($script).build()
-    };
 }
