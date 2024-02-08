@@ -48,7 +48,7 @@ impl Config {
                 format!("Failed to lock writer: {e:?}"),
             )
         })?;
-        writeln!(writer, "{}{}\n", self.prefix, message)?;
+        writeln!(writer, "{}{}", self.prefix, message)?;
         writer.flush()?;
         Ok(())
     }
