@@ -45,7 +45,7 @@ impl Config {
         let mut writer = self.writer.lock().map_err(|e| {
             std::io::Error::new(
                 std::io::ErrorKind::Other,
-                format!("Failed to lock writer: {:?}", e),
+                format!("Failed to lock writer: {e:?}"),
             )
         })?;
         writeln!(writer, "{}{}\n", self.prefix, message)?;
@@ -166,58 +166,216 @@ impl<'a> Sheller<'a> {
         command
     }
 
+    /// Run the shell command and panic if the command failed to run.
+    ///
+    /// # Examples
+    /// ```
+    /// use sheller::Sheller;
+    /// let sheller = Sheller::new("echo hello");
+    /// sheller.run();
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the command failed to run.
     pub fn run(self) {
         self.build().run();
     }
 
+    /// Run the shell command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    ///
+    /// # Examples
+    /// ```
+    /// use sheller::Sheller;
+    /// let sheller = Sheller::new("echo hello");
+    /// sheller.try_run().unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Returns an `Err` if the command failed to run.
+    ///
     pub fn try_run(self) -> Result<(), std::io::Error> {
         self.build().try_run()
     }
 
+    /// Run the shell command with the given `config` and panic if the command failed to run.
+    ///
+    /// # Examples
+    /// ```
+    /// use sheller::{Sheller, Config};
+    /// let sheller = Sheller::new("echo hello");
+    /// let config = Config::default();
+    /// sheller.run_with_config(&config);
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the command failed to run.
+    ///
     pub fn run_with_config(self, config: &Config) {
         self.build().run_with_config(config);
     }
 
+    /// Run the shell command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    ///
+    /// # Examples
+    /// ```
+    /// use sheller::{Sheller, Config};
+    /// let sheller = Sheller::new("echo hello");
+    /// let config = Config::default();
+    /// sheller.try_run_with_config(&config).unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Returns an `Err` if the command failed to run.
+    ///
     pub fn try_run_with_config(self, config: &Config) -> Result<(), std::io::Error> {
         self.build().try_run_with_config(config)
     }
 }
 
 pub trait CommandExt {
+    /// Run the command and panic if the command failed to run.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::process::Command;
+    /// let mut command = Command::new("echo");
+    /// command.arg("hello");
+    /// command.run();
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the command failed to run.
+    ///
     fn run(&mut self);
+
+    /// Run the command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::process::Command;
+    /// let mut command = Command::new("echo");
+    /// command.arg("hello");
+    /// command.try_run().unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Returns an `Err` if the command failed to run.
+    ///
     fn try_run(&mut self) -> Result<(), std::io::Error>;
+
+    /// Run the command with the given `config` and panic if the command failed to run.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::process::Command;
+    /// let mut command = Command::new("echo");
+    /// command.arg("hello");
+    /// let config = Config::default();
+    /// command.run_with_config(&config);
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the command failed to run.
+    ///
     fn run_with_config(&mut self, config: &Config);
+
+    /// Run the command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::process::Command;
+    /// use sheller::Config;
+    /// let mut command = Command::new("echo");
+    /// command.arg("hello");
+    /// let config = Config::default();
+    /// command.try_run_with_config(&config).unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Returns an `Err` if the command failed to run.
+    ///
     fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error>;
 }
 
 impl CommandExt for std::process::Command {
+    /// Run the command and panic if the command failed to run.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::process::Command;
+    /// let mut command = Command::new("echo");
+    /// command.arg("hello");
+    /// command.run();
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the command failed to run.
+    ///
     fn run(&mut self) {
         self.try_run().unwrap();
     }
 
+    /// Run the command and panic if the command failed to run.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::process::Command;
+    /// let mut command = Command::new("echo");
+    /// command.arg("hello");
+    /// command.try_run().unwrap();
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the command failed to run.
+    ///
     fn run_with_config(&mut self, config: &Config) {
         self.try_run_with_config(config).unwrap();
     }
 
+    /// Run the command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::process::Command;
+    /// let mut command = Command::new("echo");
+    /// command.arg("hello");
+    /// command.try_run().unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Returns an `Err` if the command failed to run.
+    ///
     fn try_run(&mut self) -> Result<(), std::io::Error> {
         self.try_run_with_config(&GLOBAL_CONFIG)
     }
 
+    /// Run the command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::process::Command;
+    /// use sheller::Config;
+    /// let mut command = Command::new("echo");
+    /// command.arg("hello");
+    /// let config = Config::default();
+    /// command.run_with_config(&config);
+    /// ```
+    ///
+    /// # Errors
+    /// Returns an `Err` if the command failed to run.
+    ///
     fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error> {
-        config.try_println(&format!("Running command: {:?}", self))?;
+        config.try_println(&format!("Running command: {self:?}"))?;
         let mut command = self.spawn().or_else(|e| {
-            config.try_println(&format!("Failed to spawn command: {:?}", e))?;
+            config.try_println(&format!("Failed to spawn command: {e:?}"))?;
             Err(e)
         })?;
         let status = command.wait().or_else(|e| {
-            config.try_println(&format!("Failed to wait for command: {:?}", e))?;
+            config.try_println(&format!("Failed to wait for command: {e:?}"))?;
             Err(e)
         })?;
         if !status.success() {
-            let message = format!(
-                "Failed to run command: {:?} with status: {:?}",
-                self, status
-            );
+            let message = format!("Failed to run command: {self:?} with status: {status:?}");
             config.try_println(&message)?;
             return Err(std::io::Error::new(std::io::ErrorKind::Other, message));
         }
