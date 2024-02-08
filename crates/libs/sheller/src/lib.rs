@@ -171,8 +171,8 @@ impl<'a> Sheller<'a> {
     /// # Examples
     /// ```
     /// use sheller::{Sheller, CommandExt};
-    /// let sheller = Sheller::new("echo hello");
-    /// sheller.run();
+    ///
+    /// Sheller::new("echo hello").run();
     /// ```
     ///
     /// # Panics
@@ -181,30 +181,17 @@ impl<'a> Sheller<'a> {
         self.build().run();
     }
 
-    /// Run the shell command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
-    ///
-    /// # Examples
-    /// ```
-    /// use sheller::{Sheller, CommandExt};
-    /// let sheller = Sheller::new("echo hello");
-    /// sheller.try_run().unwrap();
-    /// ```
-    ///
-    /// # Errors
-    /// Returns an `Err` if the command failed to run.
-    ///
-    pub fn try_run(self) -> Result<(), std::io::Error> {
-        self.build().try_run()
-    }
-
     /// Run the shell command with the given `config` and panic if the command failed to run.
     ///
     /// # Examples
     /// ```
     /// use sheller::{Sheller, Config, CommandExt};
-    /// let sheller = Sheller::new("echo hello");
-    /// let config = Config::default();
-    /// sheller.run_with_config(&config);
+    ///
+    /// let config = Config {
+    ///     prefix: "🦀 $ ".to_string(),
+    ///     ..Default::default()
+    /// };
+    /// Sheller::new("echo hello").run_with_config(&config);
     /// ```
     ///
     /// # Panics
@@ -214,14 +201,33 @@ impl<'a> Sheller<'a> {
         self.build().run_with_config(config);
     }
 
+    /// Run the shell command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    ///
+    /// # Examples
+    /// ```
+    /// use sheller::{Sheller, CommandExt};
+    ///
+    /// Sheller::new("echo hello").try_run().unwrap();
+    /// ```
+    ///
+    /// # Errors
+    /// Returns an `Err` if the command failed to run.
+    ///
+    pub fn try_run(self) -> Result<(), std::io::Error> {
+        self.build().try_run()
+    }
+
     /// Run the shell command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
     ///
     /// # Examples
     /// ```
     /// use sheller::{Sheller, Config, CommandExt};
-    /// let sheller = Sheller::new("echo hello");
-    /// let config = Config::default();
-    /// sheller.try_run_with_config(&config).unwrap();
+    ///
+    /// let config = Config {
+    ///     prefix: "🦀 $ ".to_string(),
+    ///     ..Default::default()
+    /// };
+    /// Sheller::new("echo hello").try_run_with_config(&config).unwrap();
     /// ```
     ///
     /// # Errors
@@ -237,11 +243,22 @@ pub trait CommandExt {
     ///
     /// # Examples
     /// ```
-    /// use std::process::Command;
     /// use sheller::CommandExt;
-    /// let mut command = Command::new("echo");
-    /// command.arg("hello");
-    /// command.run();
+    /// use std::process::Command;
+    ///
+    /// #[cfg(windows)]
+    /// fn example() {
+    ///     let mut command = Command::new("cmd.exe");
+    ///     command.args(["/D", "/S", "/C", "echo hello"]).run();
+    /// }
+    ///
+    /// #[cfg(unix)]
+    /// fn example() {
+    ///     let mut command = Command::new("echo");
+    ///     command.arg("hello").run();
+    /// }
+    ///
+    /// example();
     /// ```
     ///
     /// # Panics
@@ -249,32 +266,35 @@ pub trait CommandExt {
     ///
     fn run(&mut self);
 
-    /// Run the command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
-    ///
-    /// # Examples
-    /// ```
-    /// use std::process::Command;
-    /// use sheller::CommandExt;
-    /// let mut command = Command::new("echo");
-    /// command.arg("hello");
-    /// command.try_run().unwrap();
-    /// ```
-    ///
-    /// # Errors
-    /// Returns an `Err` if the command failed to run.
-    ///
-    fn try_run(&mut self) -> Result<(), std::io::Error>;
-
     /// Run the command with the given `config` and panic if the command failed to run.
     ///
     /// # Examples
     /// ```
+    /// use sheller::{CommandExt, Config};
     /// use std::process::Command;
-    /// use sheller::{Config, CommandExt};
-    /// let mut command = Command::new("echo");
-    /// command.arg("hello");
-    /// let config = Config::default();
-    /// command.run_with_config(&config);
+    ///
+    /// #[cfg(windows)]
+    /// fn example() {
+    ///     let mut command = Command::new("cmd.exe");
+    ///     let config = Config {
+    ///         prefix: "🦀 $ ".to_string(),
+    ///         ..Default::default()
+    ///     };
+    ///     command
+    ///         .args(["/D", "/S", "/C", "echo hello"])
+    ///         .run_with_config(&config);
+    /// }
+    ///
+    /// #[cfg(unix)]
+    /// fn example() {
+    ///     let mut command = Command::new("echo");
+    ///     let config = Config {
+    ///         prefix: "🦀 $ ".to_string(),
+    ///         ..Default::default()
+    ///     };
+    ///     command.arg("hello").run_with_config(&config);
+    /// }
+    /// example();
     /// ```
     ///
     /// # Panics
@@ -282,16 +302,67 @@ pub trait CommandExt {
     ///
     fn run_with_config(&mut self, config: &Config);
 
+    /// Run the command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    ///
+    /// # Examples
+    /// ```
+    /// use sheller::CommandExt;
+    /// use std::process::Command;
+    ///
+    /// #[cfg(windows)]
+    /// fn example() {
+    ///     let mut command = Command::new("cmd.exe");
+    ///     command
+    ///         .args(["/D", "/S", "/C", "echo hello"])
+    ///         .try_run()
+    ///         .unwrap();
+    /// }
+    ///
+    /// #[cfg(unix)]
+    /// fn example() {
+    ///     let mut command = Command::new("echo");
+    ///     command.arg("hello").try_run().unwrap();
+    /// }
+    ///
+    /// example();
+    /// ```
+    ///
+    /// # Errors
+    /// Returns an `Err` if the command failed to run.
+    ///
+    fn try_run(&mut self) -> Result<(), std::io::Error>;
+
     /// Run the command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
     ///
     /// # Examples
     /// ```
+    /// use sheller::{CommandExt, Config};
     /// use std::process::Command;
-    /// use sheller::{Config, CommandExt};
-    /// let mut command = Command::new("echo");
-    /// command.arg("hello");
-    /// let config = Config::default();
-    /// command.try_run_with_config(&config).unwrap();
+
+    /// #[cfg(windows)]
+    /// fn example() {
+    ///     let mut command = Command::new("cmd.exe");
+    ///     let config = Config {
+    ///         prefix: "🦀 $ ".to_string(),
+    ///         ..Default::default()
+    ///     };
+    ///     command
+    ///         .args(["/D", "/S", "/C", "echo hello"])
+    ///         .try_run_with_config(&config)
+    ///         .unwrap();
+    /// }
+    ///
+    /// #[cfg(unix)]
+    /// fn example() {
+    ///     let mut command = Command::new("echo");
+    ///     let config = Config {
+    ///         prefix: "🦀 $ ".to_string(),
+    ///         ..Default::default()
+    ///     };
+    ///     command.arg("hello").try_run_with_config(&config).unwrap();
+    /// }
+    ///
+    /// example();
     /// ```
     ///
     /// # Errors
@@ -305,11 +376,22 @@ impl CommandExt for std::process::Command {
     ///
     /// # Examples
     /// ```
-    /// use std::process::Command;
     /// use sheller::CommandExt;
-    /// let mut command = Command::new("echo");
-    /// command.arg("hello");
-    /// command.run();
+    /// use std::process::Command;
+    ///
+    /// #[cfg(windows)]
+    /// fn example() {
+    ///     let mut command = Command::new("cmd.exe");
+    ///     command.args(["/D", "/S", "/C", "echo hello"]).run();
+    /// }
+    ///
+    /// #[cfg(unix)]
+    /// fn example() {
+    ///     let mut command = Command::new("echo");
+    ///     command.arg("hello").run();
+    /// }
+    ///
+    /// example();
     /// ```
     ///
     /// # Panics
@@ -323,12 +405,31 @@ impl CommandExt for std::process::Command {
     ///
     /// # Examples
     /// ```
+    /// use sheller::{CommandExt, Config};
     /// use std::process::Command;
-    /// use sheller::{Config, CommandExt};
-    /// let mut command = Command::new("echo");
-    /// command.arg("hello");
-    /// let config = Config::default();
-    /// command.run_with_config(&config);
+    ///
+    /// #[cfg(windows)]
+    /// fn example() {
+    ///     let mut command = Command::new("cmd.exe");
+    ///     let config = Config {
+    ///         prefix: "🦀 $ ".to_string(),
+    ///         ..Default::default()
+    ///     };
+    ///     command
+    ///         .args(["/D", "/S", "/C", "echo hello"])
+    ///         .run_with_config(&config);
+    /// }
+    ///
+    /// #[cfg(unix)]
+    /// fn example() {
+    ///     let mut command = Command::new("echo");
+    ///     let config = Config {
+    ///         prefix: "🦀 $ ".to_string(),
+    ///         ..Default::default()
+    ///     };
+    ///     command.arg("hello").run_with_config(&config);
+    /// }
+    /// example();
     /// ```
     ///
     /// # Panics
@@ -342,11 +443,25 @@ impl CommandExt for std::process::Command {
     ///
     /// # Examples
     /// ```
-    /// use std::process::Command;
     /// use sheller::CommandExt;
-    /// let mut command = Command::new("echo");
-    /// command.arg("hello");
-    /// command.try_run().unwrap();
+    /// use std::process::Command;
+    ///
+    /// #[cfg(windows)]
+    /// fn example() {
+    ///     let mut command = Command::new("cmd.exe");
+    ///     command
+    ///         .args(["/D", "/S", "/C", "echo hello"])
+    ///         .try_run()
+    ///         .unwrap();
+    /// }
+    ///
+    /// #[cfg(unix)]
+    /// fn example() {
+    ///     let mut command = Command::new("echo");
+    ///     command.arg("hello").try_run().unwrap();
+    /// }
+    ///
+    /// example();
     /// ```
     ///
     /// # Errors
@@ -360,12 +475,33 @@ impl CommandExt for std::process::Command {
     ///
     /// # Examples
     /// ```
+    /// use sheller::{CommandExt, Config};
     /// use std::process::Command;
-    /// use sheller::{Config, CommandExt};
-    /// let mut command = Command::new("echo");
-    /// command.arg("hello");
-    /// let config = Config::default();
-    /// command.try_run_with_config(&config).unwrap();
+    ///
+    /// #[cfg(windows)]
+    /// fn example() {
+    ///     let mut command = Command::new("cmd.exe");
+    ///     let config = Config {
+    ///         prefix: "🦀 $ ".to_string(),
+    ///         ..Default::default()
+    ///     };
+    ///     command
+    ///         .args(["/D", "/S", "/C", "echo hello"])
+    ///         .try_run_with_config(&config)
+    ///         .unwrap();
+    /// }
+    ///
+    /// #[cfg(unix)]
+    /// fn example() {
+    ///     let mut command = Command::new("echo");
+    ///     let config = Config {
+    ///         prefix: "🦀 $ ".to_string(),
+    ///         ..Default::default()
+    ///     };
+    ///     command.arg("hello").try_run_with_config(&config).unwrap();
+    /// }
+    ///
+    /// example();
     /// ```
     ///
     /// # Errors

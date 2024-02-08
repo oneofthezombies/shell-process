@@ -93,18 +93,21 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)]
     fn command_ext_run() {
         let mut command = std::process::Command::new("echo");
         command.arg("hello").run();
     }
 
     #[test]
+    #[cfg(unix)]
     fn command_ext_try_run() {
         let mut command = std::process::Command::new("echo");
         command.arg("hello").try_run().unwrap();
     }
 
     #[test]
+    #[cfg(unix)]
     fn command_ext_run_with_config() {
         let mut command = std::process::Command::new("echo");
         let config = Config::default();
@@ -112,6 +115,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)]
     fn command_ext_try_run_with_config() {
         let mut command = std::process::Command::new("echo");
         let config = Config::default();
@@ -119,6 +123,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)]
     fn command_ext_run_with_config_custom() {
         let mut command = std::process::Command::new("echo");
         let config = Config {
@@ -129,6 +134,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)]
     fn command_ext_try_run_with_config_custom() {
         let mut command = std::process::Command::new("echo");
         let config = Config {
@@ -136,6 +142,71 @@ mod tests {
             ..Default::default()
         };
         command.arg("hello").try_run_with_config(&config).unwrap();
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn command_ext_run() {
+        let mut command = std::process::Command::new("cmd.exe");
+        command.args(["/D", "/S", "/C", "echo hello"]).run();
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn command_ext_try_run() {
+        let mut command = std::process::Command::new("cmd.exe");
+        command
+            .args(["/D", "/S", "/C", "echo hello"])
+            .try_run()
+            .unwrap();
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn command_ext_run_with_config() {
+        let mut command = std::process::Command::new("cmd.exe");
+        let config = Config::default();
+        command
+            .args(["/D", "/S", "/C", "echo hello"])
+            .run_with_config(&config);
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn command_ext_try_run_with_config() {
+        let mut command = std::process::Command::new("cmd.exe");
+        let config = Config::default();
+        command
+            .args(["/D", "/S", "/C", "echo hello"])
+            .try_run_with_config(&config)
+            .unwrap();
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn command_ext_run_with_config_custom() {
+        let mut command = std::process::Command::new("cmd.exe");
+        let config = Config {
+            prefix: "🦀 $ ".to_string(),
+            ..Default::default()
+        };
+        command
+            .args(["/D", "/S", "/C", "echo hello"])
+            .run_with_config(&config);
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn command_ext_try_run_with_config_custom() {
+        let mut command = std::process::Command::new("cmd.exe");
+        let config = Config {
+            prefix: "🦀 $ ".to_string(),
+            ..Default::default()
+        };
+        command
+            .args(["/D", "/S", "/C", "echo hello"])
+            .try_run_with_config(&config)
+            .unwrap();
     }
 
     #[test]
