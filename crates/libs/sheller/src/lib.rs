@@ -170,7 +170,7 @@ impl<'a> Sheller<'a> {
     ///
     /// # Examples
     /// ```
-    /// use sheller::Sheller;
+    /// use sheller::{Sheller, CommandExt};
     /// let sheller = Sheller::new("echo hello");
     /// sheller.run();
     /// ```
@@ -185,7 +185,7 @@ impl<'a> Sheller<'a> {
     ///
     /// # Examples
     /// ```
-    /// use sheller::Sheller;
+    /// use sheller::{Sheller, CommandExt};
     /// let sheller = Sheller::new("echo hello");
     /// sheller.try_run().unwrap();
     /// ```
@@ -201,7 +201,7 @@ impl<'a> Sheller<'a> {
     ///
     /// # Examples
     /// ```
-    /// use sheller::{Sheller, Config};
+    /// use sheller::{Sheller, Config, CommandExt};
     /// let sheller = Sheller::new("echo hello");
     /// let config = Config::default();
     /// sheller.run_with_config(&config);
@@ -218,7 +218,7 @@ impl<'a> Sheller<'a> {
     ///
     /// # Examples
     /// ```
-    /// use sheller::{Sheller, Config};
+    /// use sheller::{Sheller, Config, CommandExt};
     /// let sheller = Sheller::new("echo hello");
     /// let config = Config::default();
     /// sheller.try_run_with_config(&config).unwrap();
@@ -238,6 +238,7 @@ pub trait CommandExt {
     /// # Examples
     /// ```
     /// use std::process::Command;
+    /// use sheller::CommandExt;
     /// let mut command = Command::new("echo");
     /// command.arg("hello");
     /// command.run();
@@ -253,6 +254,7 @@ pub trait CommandExt {
     /// # Examples
     /// ```
     /// use std::process::Command;
+    /// use sheller::CommandExt;
     /// let mut command = Command::new("echo");
     /// command.arg("hello");
     /// command.try_run().unwrap();
@@ -268,6 +270,7 @@ pub trait CommandExt {
     /// # Examples
     /// ```
     /// use std::process::Command;
+    /// use sheller::{Config, CommandExt};
     /// let mut command = Command::new("echo");
     /// command.arg("hello");
     /// let config = Config::default();
@@ -284,7 +287,7 @@ pub trait CommandExt {
     /// # Examples
     /// ```
     /// use std::process::Command;
-    /// use sheller::Config;
+    /// use sheller::{Config, CommandExt};
     /// let mut command = Command::new("echo");
     /// command.arg("hello");
     /// let config = Config::default();
@@ -303,6 +306,7 @@ impl CommandExt for std::process::Command {
     /// # Examples
     /// ```
     /// use std::process::Command;
+    /// use sheller::CommandExt;
     /// let mut command = Command::new("echo");
     /// command.arg("hello");
     /// command.run();
@@ -320,9 +324,11 @@ impl CommandExt for std::process::Command {
     /// # Examples
     /// ```
     /// use std::process::Command;
+    /// use sheller::{Config, CommandExt};
     /// let mut command = Command::new("echo");
     /// command.arg("hello");
-    /// command.try_run().unwrap();
+    /// let config = Config::default();
+    /// command.run_with_config(&config);
     /// ```
     ///
     /// # Panics
@@ -337,6 +343,7 @@ impl CommandExt for std::process::Command {
     /// # Examples
     /// ```
     /// use std::process::Command;
+    /// use sheller::CommandExt;
     /// let mut command = Command::new("echo");
     /// command.arg("hello");
     /// command.try_run().unwrap();
@@ -354,11 +361,11 @@ impl CommandExt for std::process::Command {
     /// # Examples
     /// ```
     /// use std::process::Command;
-    /// use sheller::Config;
+    /// use sheller::{Config, CommandExt};
     /// let mut command = Command::new("echo");
     /// command.arg("hello");
     /// let config = Config::default();
-    /// command.run_with_config(&config);
+    /// command.try_run_with_config(&config).unwrap();
     /// ```
     ///
     /// # Errors
