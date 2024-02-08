@@ -1,8 +1,58 @@
-use std::{env, process};
+#[macro_use]
+extern crate lazy_static;
+
 use tracing::debug;
 
-#[cfg(debug_assertions)]
-pub mod debug;
+lazy_static! {
+    static ref GLOBAL_CONFIG: Config = Config::default();
+}
+
+/// Configuration for shell execution and error logging.
+///
+/// # Examples
+///
+/// initialize with default values:
+/// ```
+/// use sheller::Config;
+/// let config = Config::default();
+/// ```
+///
+/// initialize with custom values:
+/// ```
+/// use sheller::Config;
+/// let config = Config {
+///    prefix: "🦀 $ ".to_string(),
+///   ..Default::default()
+/// };
+///
+///
+pub struct Config {
+    pub prefix: String,
+    pub writer: std::sync::Mutex<Box<dyn std::io::Write + Sync + Send>>,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            prefix: "🐚 $ ".to_string(),
+            writer: std::sync::Mutex::new(Box::new(std::io::stdout())),
+        }
+    }
+}
+
+impl Config {
+    fn try_println(&self, message: &str) -> std::io::Result<()> {
+        let mut writer = self.writer.lock().map_err(|e| {
+            std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("Failed to lock writer: {:?}", e),
+            )
+        })?;
+        writeln!(writer, "{}{}\n", self.prefix, message)?;
+        writer.flush()?;
+        Ok(())
+    }
+}
 
 #[derive(Debug)]
 struct Metadata<'a> {
@@ -26,7 +76,7 @@ static DEFAULT_METADATA: Metadata = Metadata {
 };
 
 fn parse_program() -> String {
-    env::var(DEFAULT_METADATA.env_key).unwrap_or_else(|e| {
+    std::env::var(DEFAULT_METADATA.env_key).unwrap_or_else(|e| {
         debug!(
             default_program = DEFAULT_METADATA.program,
             env_key = DEFAULT_METADATA.env_key,
@@ -109,10 +159,78 @@ impl<'a> Sheller<'a> {
     /// assert!(command.status().unwrap().success());
     /// ```
     #[must_use]
-    pub fn build(self) -> process::Command {
-        let mut command = process::Command::new(&self.program);
+    pub fn build(self) -> std::process::Command {
+        let mut command = std::process::Command::new(&self.program);
         command.args(&self.args);
         command.arg(self.script);
         command
+    }
+
+    pub fn run(self) {
+        self.build().run();
+    }
+
+    pub fn try_run(self) -> Result<(), std::io::Error> {
+        self.build().try_run()
+    }
+
+    pub fn run_with_config(self, config: &Config) {
+        self.build().run_with_config(config);
+    }
+
+    pub fn try_run_with_config(self, config: &Config) -> Result<(), std::io::Error> {
+        self.build().try_run_with_config(config)
+    }
+}
+
+pub trait CommandExt {
+    fn run(&mut self);
+    fn try_run(&mut self) -> Result<(), std::io::Error>;
+    fn run_with_config(&mut self, config: &Config);
+    fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error>;
+}
+
+impl CommandExt for std::process::Command {
+    fn run(&mut self) {
+        self.try_run().unwrap();
+    }
+
+    fn run_with_config(&mut self, config: &Config) {
+        self.try_run_with_config(config).unwrap();
+    }
+
+    fn try_run(&mut self) -> Result<(), std::io::Error> {
+        self.try_run_with_config(&GLOBAL_CONFIG)
+    }
+
+    fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error> {
+        config.try_println(&format!("Running command: {:?}", self))?;
+        let mut command = self.spawn().or_else(|e| {
+            config.try_println(&format!("Failed to spawn command: {:?}", e))?;
+            Err(e)
+        })?;
+        let status = command.wait().or_else(|e| {
+            config.try_println(&format!("Failed to wait for command: {:?}", e))?;
+            Err(e)
+        })?;
+        if !status.success() {
+            let message = format!(
+                "Failed to run command: {:?} with status: {:?}",
+                self, status
+            );
+            config.try_println(&message)?;
+            return Err(std::io::Error::new(std::io::ErrorKind::Other, message));
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn config_global() {
+        assert_eq!(GLOBAL_CONFIG.prefix, "🐚 $ ");
     }
 }

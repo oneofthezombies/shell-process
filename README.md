@@ -1,6 +1,6 @@
 # Sheller
 
-🐚 Sheller is a shell command builder library written in Rust.  
+🐚 Sheller is a shell command builder and runner library written in Rust.  
 
 [![Build Status][actions-badge]][actions-url]
 [![Crates.io][crates-badge]][crates-url]
