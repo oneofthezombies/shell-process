@@ -148,7 +148,7 @@ So you don't necessarily have to use `Sheller`.
 Below is an example that uses only `CommandExt` without using `Sheller`.  
 
 ```rust
-use sheller::{CommandExt};
+use sheller::CommandExt;
 
 let mut command = std::process::Command::new("echo");
 command.arg("hello").run();
