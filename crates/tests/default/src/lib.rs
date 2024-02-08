@@ -43,48 +43,46 @@ mod tests {
 
     #[test]
     fn run() {
-        let sheller = Sheller::new("echo hello");
-        sheller.run();
+        Sheller::new("echo hello").run();
     }
 
     #[test]
     fn try_run() {
-        let sheller = Sheller::new("echo hello");
-        sheller.try_run().unwrap();
+        Sheller::new("echo hello").try_run().unwrap();
     }
 
     #[test]
     fn run_with_config() {
-        let sheller = Sheller::new("echo hello");
         let config = Config::default();
-        sheller.run_with_config(&config);
+        Sheller::new("echo hello").run_with_config(&config);
     }
 
     #[test]
     fn run_with_config_custom() {
-        let sheller = Sheller::new("echo hello");
         let config = Config {
             prefix: "🦀 $ ".to_string(),
             ..Default::default()
         };
-        sheller.run_with_config(&config);
+        Sheller::new("echo hello").run_with_config(&config);
     }
 
     #[test]
     fn try_run_with_config() {
-        let sheller = Sheller::new("echo hello");
         let config = Config::default();
-        sheller.try_run_with_config(&config).unwrap();
+        Sheller::new("echo hello")
+            .try_run_with_config(&config)
+            .unwrap();
     }
 
     #[test]
     fn try_run_with_config_custom() {
-        let sheller = Sheller::new("echo hello");
         let config = Config {
             prefix: "🦀 $ ".to_string(),
             ..Default::default()
         };
-        sheller.try_run_with_config(&config).unwrap();
+        Sheller::new("echo hello")
+            .try_run_with_config(&config)
+            .unwrap();
     }
 
     #[test]
@@ -141,47 +139,47 @@ mod tests {
 
     #[test]
     fn build_run() {
-        let sheller = Sheller::new("echo hello");
-        sheller.build().run();
+        let mut command = Sheller::new("echo hello").build();
+        command.run();
     }
 
     #[test]
     fn build_try_run() {
-        let sheller = Sheller::new("echo hello");
-        sheller.build().try_run().unwrap();
+        let mut command = Sheller::new("echo hello").build();
+        command.try_run().unwrap();
     }
 
     #[test]
     fn build_run_with_config() {
-        let sheller = Sheller::new("echo hello");
+        let mut command = Sheller::new("echo hello").build();
         let config = Config::default();
-        sheller.build().run_with_config(&config);
+        command.run_with_config(&config);
     }
 
     #[test]
     fn build_try_run_with_config() {
-        let sheller = Sheller::new("echo hello");
+        let mut command = Sheller::new("echo hello").build();
         let config = Config::default();
-        sheller.build().try_run_with_config(&config).unwrap();
+        command.try_run_with_config(&config).unwrap();
     }
 
     #[test]
     fn build_run_with_config_custom() {
-        let sheller = Sheller::new("echo hello");
+        let mut command = Sheller::new("echo hello").build();
         let config = Config {
             prefix: "🦀 $ ".to_string(),
             ..Default::default()
         };
-        sheller.build().run_with_config(&config);
+        command.run_with_config(&config);
     }
 
     #[test]
     fn build_try_run_with_config_custom() {
-        let sheller = Sheller::new("echo hello");
+        let mut command = Sheller::new("echo hello").build();
         let config = Config {
             prefix: "🦀 $ ".to_string(),
             ..Default::default()
         };
-        sheller.build().try_run_with_config(&config).unwrap();
+        command.try_run_with_config(&config).unwrap();
     }
 }
