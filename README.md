@@ -1,6 +1,6 @@
 # Sheller
 
-🐚 Sheller is a shell command builder and runner library written in Rust.  
+🐚 Sheller is a shell command builder and standard command extension library written in Rust.  
 
 [![Build Status][actions-badge]][actions-url]
 [![Crates.io][crates-badge]][crates-url]
@@ -63,45 +63,95 @@ Add `sheller` to your dependencies.
 ```toml
 # Cargo.toml
 [dependencies]
-sheller = "0.1"
+sheller = "0.2"
 ```
 
-Below is an example of calling `npm install` using builder.  
-It is each to further manipulate the stdout, stderr, and current working directory of the returned `std::process::Command`.
+Below are examples using `sheller`.  
+
+⚠️ If you don't see the `run` method, check `use sheller::CommandExt`.  
+
+If you simply want to run a shell script, use it as follows.  
 
 ```rust
-use sheller::Sheller;
+use sheller::{CommandExt, Sheller};
 
-let mut command = Sheller::new("npm install").build();
-assert!(command.status().unwrap().success());
+Sheller::new("echo hello").run();
+// The log below is output to stdout.
+// 🐚 $ Running command: "/bin/bash" "-c" "echo hello"
+// hello
 ```
 
-Below is an example of calling `npm install` using utility function.  
+If you don't want `panic`, you can use the `Sheller::try_run` methods to receive and process `std::io::Result<()>`.  
 
 ```rust
-use sheller::debug::sh;
+use sheller::{CommandExt, Sheller};
 
-sh("npm install");
+// if the function returns std::io::Result<T>
+Sheller::new("echo hello").try_run()?
+
+// if the function does not return NOT std::io::Result<T>
+Sheller::new("echo hello").try_run().map_err(|e| {
+    // transform error
+})?;
 ```
 
-⚠️ This feature is only available when `debug_assertions` is enabled.  
+`run` and `try_run` use default configurations.  
+Configuration has the values `prefix` and `writer`.  
+The default value for `prefix` is `"🐚 $ "`.  
+The default value for `writer` is `std::sync::Mutex::new(Box::new(std::io::stdout()))`.  
+This `prefix` and `writer` are used to print which command is executed before actually running, or which command is called when an error occurs.  
 
-I designed it this way to use it as a development environment utility.  
-As shown below, it it a simple implementation for development utility rather than for manipulating various functions.  
-The reason it it not implemented as a macro is because it can also be implemented as a function.  
-I think that when the implementation I want to express cannot be implemented as a function but only as a macro, it it better to implement it as a macro.  
-Because macros are quite difficult to read, even when read with the aid of modern developer tools.  
+If you want to change the configurations, please follow the example below.  
 
 ```rust
-pub fn sh(script: &str) {
-    let mut command = Sheller::new(script).build();
-    assert!(command
-        .stdout(process::Stdio::inherit())
-        .stderr(process::Stdio::inherit())
-        .status()
-        .unwrap()
-        .success());
-}
+use sheller::{CommandExt, Config, Sheller};
+
+// binding to variable 
+let config = Config {
+    prefix: "🦀 $ ".to_string(),
+    ..Default::default()
+};
+Sheller::new("echo hello").run_with_config(&config);
+
+// without binding to variable
+Sheller::new("echo hello").run_with_config(&Config {
+    prefix: "🦀 $ ".to_string(),
+    ..Default::default()
+});
+```
+
+The `Sheller::run_with_config` method generates `panic` of the command failes.  
+If you do not want `panic` to occur, please use `Sheller::try_run_with_config` to process `std::io::Result<()>`.  
+
+`Sheller` uses `std::process::Command`.  
+If you want to change the current working path, stdout/stderr or environment variables, use the `Sheller::build` method.  
+This method returns `std::process::Command`.  
+
+Below is an example of changing the current working path.  
+
+```rust
+use sheller::{CommandExt, Sheller};
+
+let mut command = Sheller::new("echo hello").build();
+command.current_dir("/my/dir").run();
+```
+
+Likewise, `run`, `run_with_config`, `try_run` and `try_run_with_config` can all be used.  
+
+In addition to the four methods above, you can of course also use the Rust official `std::process::Command` methods.  
+For more information about `std::process::Command`, please check [the Rust official page](https://doc.rust-lang.org/std/process/struct.Command.html).  
+
+The `run`, `run_with_config`, `try_run`, and `try_run_with_config` methods are implemented as `CommandExt`.  
+The purpose of these methods is utility.  
+So you don't necessarily have to use `Sheller`.  
+
+Below is an example that uses only `CommandExt` without using `Sheller`.  
+
+```rust
+use sheller::{CommandExt};
+
+let mut command = std::process::Command::new("echo");
+command.arg("hello").run();
 ```
 
 ## Internal Implementation

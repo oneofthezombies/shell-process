@@ -28,17 +28,19 @@ mod tests {
 
     #[test]
     fn config_default() {
-        let config = Config::default();
-        assert_eq!(config.prefix, "🐚 $ ");
+        assert_eq!(Config::default().prefix, "🐚 $ ");
     }
 
     #[test]
     fn config_custom() {
-        let config = Config {
-            prefix: "🦀 $ ".to_string(),
-            ..Default::default()
-        };
-        assert_eq!(config.prefix, "🦀 $ ");
+        assert_eq!(
+            Config {
+                prefix: "🦀 $ ".to_string(),
+                ..Default::default()
+            }
+            .prefix,
+            "🦀 $ "
+        );
     }
 
     #[test]
@@ -53,8 +55,7 @@ mod tests {
 
     #[test]
     fn run_with_config() {
-        let config = Config::default();
-        Sheller::new("echo hello").run_with_config(&config);
+        Sheller::new("echo hello").run_with_config(&Config::default());
     }
 
     #[test]
@@ -67,74 +68,74 @@ mod tests {
     }
 
     #[test]
+    fn run_with_config_custom_without_let() {
+        Sheller::new("echo hello").run_with_config(&Config {
+            prefix: "🦀 $ ".to_string(),
+            ..Default::default()
+        });
+    }
+
+    #[test]
     fn try_run_with_config() {
-        let config = Config::default();
         Sheller::new("echo hello")
-            .try_run_with_config(&config)
+            .try_run_with_config(&Config::default())
             .unwrap();
     }
 
     #[test]
     fn try_run_with_config_custom() {
-        let config = Config {
-            prefix: "🦀 $ ".to_string(),
-            ..Default::default()
-        };
         Sheller::new("echo hello")
-            .try_run_with_config(&config)
+            .try_run_with_config(&Config {
+                prefix: "🦀 $ ".to_string(),
+                ..Default::default()
+            })
             .unwrap();
     }
 
     #[test]
     fn command_ext_run() {
         let mut command = std::process::Command::new("echo");
-        command.arg("hello");
-        command.run();
+        command.arg("hello").run();
     }
 
     #[test]
     fn command_ext_try_run() {
         let mut command = std::process::Command::new("echo");
-        command.arg("hello");
-        command.try_run().unwrap();
+        command.arg("hello").try_run().unwrap();
     }
 
     #[test]
     fn command_ext_run_with_config() {
         let mut command = std::process::Command::new("echo");
-        command.arg("hello");
         let config = Config::default();
-        command.run_with_config(&config);
+        command.arg("hello").run_with_config(&config);
     }
 
     #[test]
     fn command_ext_try_run_with_config() {
         let mut command = std::process::Command::new("echo");
-        command.arg("hello");
         let config = Config::default();
-        command.try_run_with_config(&config).unwrap();
+        command.arg("hello").try_run_with_config(&config).unwrap();
     }
 
     #[test]
     fn command_ext_run_with_config_custom() {
         let mut command = std::process::Command::new("echo");
-        command.arg("hello");
         let config = Config {
             prefix: "🦀 $ ".to_string(),
             ..Default::default()
         };
-        command.run_with_config(&config);
+        command.arg("hello").run_with_config(&config);
     }
 
     #[test]
     fn command_ext_try_run_with_config_custom() {
         let mut command = std::process::Command::new("echo");
-        command.arg("hello");
         let config = Config {
             prefix: "🦀 $ ".to_string(),
             ..Default::default()
         };
-        command.try_run_with_config(&config).unwrap();
+        command.arg("hello").try_run_with_config(&config).unwrap();
     }
 
     #[test]

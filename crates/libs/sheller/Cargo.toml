@@ -1,6 +1,6 @@
 [package]
 name = "sheller"
-description = "🐚 Sheller is a shell command builder and runner library written in Rust."
+description = "🐚 Sheller is a shell command builder and standard command extension library written in Rust."
 keywords = ["shell", "command", "sh", "cmd"]
 version.workspace = true
 edition.workspace = true
