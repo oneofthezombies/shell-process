@@ -56,6 +56,22 @@ The goal is to be able to call command lines in a shell environment.
 For this reason, I created the Sheller library.  
 This is to write utility functions in the Rust project I use, or to use them in a Rust application if needed in the future.  
 
+## How does it Work
+
+If you want to call `echo hello` then,
+
+### Windows  
+
+When `target_family` is `windows`.  
+Set the `COMSPEC` environment variable to `program`, and if the environment variable is not set, used `cmd.exe` as the fallback program.  
+Also set the `args` to `["/D", "/S", "/C", "echo hello"]`.  
+
+### Unix
+
+When `target_family` is `unix`.  
+Set the `SHELL` environment variable to program, and if the environment variable is not set, used `/bin/sh` as the fallback program.  
+Also set the `args` to `["-c", "echo hello"]`.
+
 ## How to Use
 
 Add `sheller` to your dependencies.
@@ -167,17 +183,3 @@ fn main() {
     command.arg("hello").run();
 }
 ```
-
-## Internal Implementation
-
-### Windows  
-
-When `target_family` is `windows`.  
-Set the `COMSPEC` environment variable to `program`, and if the environment variable is not set, use `cmd.exe` as the fallback program.  
-Also set the `args` to `["/D", "/S", "/C"]`.  
-
-### Unix
-
-When `target_family` is `unix`.  
-Set the `SHELL` environment variable to program, and if the environment variable is not set, use `/bin/sh` as the fallback program.  
-Also set the `args` to `["-c"]`.
