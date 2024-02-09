@@ -483,13 +483,13 @@ impl CommandExt for std::process::Command {
     fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error> {
         let Config { prefix } = config;
         info!(command = ?self, "{prefix}Running command");
-        let mut command = self.spawn().or_else(|e| {
+        let mut command = self.spawn().map_err(|e| {
             error!(command = ?self, error = ?e, "{prefix}Failed to spawn command");
-            Err(e)
+            e
         })?;
-        let status = command.wait().or_else(|e| {
+        let status = command.wait().map_err(|e| {
             error!(command = ?self, error = ?e, "{prefix}Failed to wait for command");
-            Err(e)
+            e
         })?;
         if !status.success() {
             let message = format!("Failed to run command: {self:?} with status: {status:?}");
