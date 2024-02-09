@@ -1,8 +1,6 @@
 use clap::{Parser, Subcommand};
-use std::{
-    panic,
-    process::{self, Stdio},
-};
+use sheller::Sheller;
+use std::panic;
 
 #[derive(Parser)]
 #[command(arg_required_else_help = true)]
@@ -13,6 +11,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    Init,
     Check,
     Clippy,
     Fmt,
@@ -23,56 +22,25 @@ enum Command {
     PrePush,
 }
 
-fn run(program: &str, args: &[&str]) {
-    let mut command = process::Command::new(program);
-    command
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .args(args);
-    println!("Run {program} {args:?}");
-    match command.status() {
-        Ok(status) => {
-            if !status.success() {
-                eprintln!("Exit code: {:?}", status.code());
-                std::process::exit(1);
-            }
-        }
-        Err(e) => {
-            eprintln!("Error: {e:?}");
-            std::process::exit(1);
-        }
-    }
-}
-
 fn check() {
-    run("cargo", &["check", "--workspace"]);
+    Sheller::new("cargo check --workspace").run();
 }
 
 fn clippy() {
-    run(
-        "cargo",
-        &[
-            "clippy",
-            "--",
-            "-D",
-            "clippy::all",
-            "-D",
-            "clippy::pedantic",
-        ],
-    );
+    Sheller::new("cargo clippy -- -D clippy::all -D clippy::pedantic").run();
 }
 
 fn fmt() {
-    run("cargo", &["fmt", "--", "--check"]);
+    Sheller::new("cargo fmt -- --check").run();
 }
 
 fn test(target: Option<String>) {
     let Some(target) = target else {
-        run("cargo", &["test", "--workspace"]);
+        Sheller::new("cargo test --workspace").run();
         return;
     };
 
-    run("cargo", &["test", "--target", target.as_str()]);
+    Sheller::new(format!("cargo test --target {target}").as_str()).run();
 }
 
 fn pre_push() {
@@ -82,9 +50,16 @@ fn pre_push() {
     test(None);
 }
 
+fn init() {
+    Sheller::new("rustup install nightly").run();
+    Sheller::new("rustup component add rustfmt --toolchain nightly").run();
+    Sheller::new("rustup override set nightly").run();
+}
+
 fn main() {
     let cli = Cli::parse();
     match cli.command {
+        Some(Command::Init) => init(),
         Some(Command::Check) => check(),
         Some(Command::Clippy) => clippy(),
         Some(Command::Fmt) => fmt(),

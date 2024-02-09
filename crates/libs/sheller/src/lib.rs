@@ -18,14 +18,12 @@ lazy_static! {
 /// ```
 ///
 /// initialize with custom values:
-/// ```
+/// ```rust
 /// use sheller::Config;
 /// let config = Config {
-///    prefix: "🦀 $ ".to_string(),
-///   ..Default::default()
+///     prefix: "🦀 $ ".to_string(),
+///     ..Default::default()
 /// };
-///
-///
 pub struct Config {
     pub prefix: String,
     pub writer: std::sync::Mutex<Box<dyn std::io::Write + Sync + Send>>,
@@ -170,7 +168,7 @@ impl<'a> Sheller<'a> {
     ///
     /// # Examples
     /// ```
-    /// use sheller::{Sheller, CommandExt};
+    /// use sheller::{CommandExt, Sheller};
     ///
     /// Sheller::new("echo hello").run();
     /// ```
@@ -185,7 +183,7 @@ impl<'a> Sheller<'a> {
     ///
     /// # Examples
     /// ```
-    /// use sheller::{Sheller, Config, CommandExt};
+    /// use sheller::{CommandExt, Config, Sheller};
     ///
     /// let config = Config {
     ///     prefix: "🦀 $ ".to_string(),
@@ -196,7 +194,6 @@ impl<'a> Sheller<'a> {
     ///
     /// # Panics
     /// Panics if the command failed to run.
-    ///
     pub fn run_with_config(self, config: &Config) {
         self.build().run_with_config(config);
     }
@@ -205,14 +202,13 @@ impl<'a> Sheller<'a> {
     ///
     /// # Examples
     /// ```
-    /// use sheller::{Sheller, CommandExt};
+    /// use sheller::{CommandExt, Sheller};
     ///
     /// Sheller::new("echo hello").try_run().unwrap();
     /// ```
     ///
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    ///
     pub fn try_run(self) -> Result<(), std::io::Error> {
         self.build().try_run()
     }
@@ -221,18 +217,19 @@ impl<'a> Sheller<'a> {
     ///
     /// # Examples
     /// ```
-    /// use sheller::{Sheller, Config, CommandExt};
+    /// use sheller::{CommandExt, Config, Sheller};
     ///
     /// let config = Config {
     ///     prefix: "🦀 $ ".to_string(),
     ///     ..Default::default()
     /// };
-    /// Sheller::new("echo hello").try_run_with_config(&config).unwrap();
+    /// Sheller::new("echo hello")
+    ///     .try_run_with_config(&config)
+    ///     .unwrap();
     /// ```
     ///
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    ///
     pub fn try_run_with_config(self, config: &Config) -> Result<(), std::io::Error> {
         self.build().try_run_with_config(config)
     }
@@ -263,7 +260,6 @@ pub trait CommandExt {
     ///
     /// # Panics
     /// Panics if the command failed to run.
-    ///
     fn run(&mut self);
 
     /// Run the command with the given `config` and panic if the command failed to run.
@@ -299,7 +295,6 @@ pub trait CommandExt {
     ///
     /// # Panics
     /// Panics if the command failed to run.
-    ///
     fn run_with_config(&mut self, config: &Config);
 
     /// Run the command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
@@ -329,7 +324,6 @@ pub trait CommandExt {
     ///
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    ///
     fn try_run(&mut self) -> Result<(), std::io::Error>;
 
     /// Run the command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
@@ -364,10 +358,9 @@ pub trait CommandExt {
     ///
     /// example();
     /// ```
-    ///
+    /// 
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    ///
     fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error>;
 }
 
@@ -396,7 +389,6 @@ impl CommandExt for std::process::Command {
     ///
     /// # Panics
     /// Panics if the command failed to run.
-    ///
     fn run(&mut self) {
         self.try_run().unwrap();
     }
@@ -434,7 +426,6 @@ impl CommandExt for std::process::Command {
     ///
     /// # Panics
     /// Panics if the command failed to run.
-    ///
     fn run_with_config(&mut self, config: &Config) {
         self.try_run_with_config(config).unwrap();
     }
@@ -466,7 +457,6 @@ impl CommandExt for std::process::Command {
     ///
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    ///
     fn try_run(&mut self) -> Result<(), std::io::Error> {
         self.try_run_with_config(&GLOBAL_CONFIG)
     }
@@ -506,7 +496,6 @@ impl CommandExt for std::process::Command {
     ///
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    ///
     fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error> {
         config.try_println(&format!("Running command: {self:?}"))?;
         let mut command = self.spawn().or_else(|e| {
