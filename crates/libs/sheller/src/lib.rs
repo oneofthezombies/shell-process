@@ -1,13 +1,6 @@
-#[macro_use]
-extern crate lazy_static;
-
-use tracing::debug;
+use tracing::{debug, error, info};
 
 mod macros;
-
-lazy_static! {
-    static ref GLOBAL_CONFIG: Config = Config::default();
-}
 
 /// Configuration for shell execution and error logging.
 ///
@@ -28,29 +21,15 @@ lazy_static! {
 /// };
 pub struct Config {
     pub prefix: String,
-    pub writer: std::sync::Mutex<Box<dyn std::io::Write + Sync + Send>>,
 }
+
+static DEFAULT_PREFIX: &str = "🐚 $ ";
 
 impl Default for Config {
     fn default() -> Self {
         Config {
-            prefix: "🐚 $ ".to_string(),
-            writer: std::sync::Mutex::new(Box::new(std::io::stdout())),
+            prefix: DEFAULT_PREFIX.into(),
         }
-    }
-}
-
-impl Config {
-    fn try_println(&self, message: &str) -> std::io::Result<()> {
-        let mut writer = self.writer.lock().map_err(|e| {
-            std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("Failed to lock writer: {e:?}"),
-            )
-        })?;
-        writeln!(writer, "{}{}", self.prefix, message)?;
-        writer.flush()?;
-        Ok(())
     }
 }
 
@@ -463,7 +442,7 @@ impl CommandExt for std::process::Command {
     /// # Errors
     /// Returns an `Err` if the command failed to run.
     fn try_run(&mut self) -> Result<(), std::io::Error> {
-        self.try_run_with_config(&GLOBAL_CONFIG)
+        self.try_run_with_config(&Config::default())
     }
 
     /// Run the command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
@@ -502,18 +481,19 @@ impl CommandExt for std::process::Command {
     /// # Errors
     /// Returns an `Err` if the command failed to run.
     fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error> {
-        config.try_println(&format!("Running command: {self:?}"))?;
+        let Config { prefix } = config;
+        info!(command = ?self, "{prefix}Running command");
         let mut command = self.spawn().or_else(|e| {
-            config.try_println(&format!("Failed to spawn command: {e:?}"))?;
+            error!(command = ?self, error = ?e, "{prefix}Failed to spawn command");
             Err(e)
         })?;
         let status = command.wait().or_else(|e| {
-            config.try_println(&format!("Failed to wait for command: {e:?}"))?;
+            error!(command = ?self, error = ?e, "{prefix}Failed to wait for command");
             Err(e)
         })?;
         if !status.success() {
             let message = format!("Failed to run command: {self:?} with status: {status:?}");
-            config.try_println(&message)?;
+            error!(command = ?self, status = ?status, "{prefix}Failed to run command");
             return Err(std::io::Error::new(std::io::ErrorKind::Other, message));
         }
         Ok(())
@@ -525,7 +505,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn config_global() {
-        assert_eq!(GLOBAL_CONFIG.prefix, "🐚 $ ");
+    fn default_prefix() {
+        let config = Config::default();
+        assert_eq!(config.prefix, DEFAULT_PREFIX);
+        assert_eq!(config.prefix, "🐚 $ ");
     }
 }
