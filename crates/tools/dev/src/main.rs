@@ -58,7 +58,7 @@ fn pre_push() {
 /// So for Github Action, I changed to call `rustup install nightly` before calling `cargo run --package tool-dev -- init`.
 /// Please see the workflow file at `.github/workflows/CI.yml`.
 fn init() {
-    if !env::var("GITHUB_ACTIONS").is_ok() {
+    if env::var("GITHUB_ACTIONS").is_err() {
         Sheller::new("rustup install nightly").run();
     }
 
