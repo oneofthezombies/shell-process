@@ -55,11 +55,11 @@ fn pre_push() {
 
 fn remove_file_force<P: AsRef<Path>>(path: P) {
     match fs::remove_file(&path) {
-        Ok(_) => println!("File deleted successfully."),
+        Ok(()) => println!("File deleted successfully."),
         Err(e) if e.kind() == io::ErrorKind::NotFound => {
             println!("File not found, but it's ok.");
         }
-        Err(e) => println!("Error deleting file: {}", e),
+        Err(e) => println!("Error deleting file: {e}"),
     }
 }
 
