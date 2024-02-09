@@ -76,17 +76,16 @@ fn init_log() {
 
 fn main() {
     init_log();
-
     let cli = Cli::parse();
-    match cli.command {
-        Some(Command::Init) => init(),
-        Some(Command::Check) => check(),
-        Some(Command::Clippy) => clippy(),
-        Some(Command::Fmt) => fmt(),
-        Some(Command::Test { target }) => test(target),
-        Some(Command::PrePush) => pre_push(),
-        None => {
-            panic!("No command");
-        }
+    let Some(command) = cli.command else {
+        panic!("No command");
+    };
+    match command {
+        Command::Init => init(),
+        Command::Check => check(),
+        Command::Clippy => clippy(),
+        Command::Fmt => fmt(),
+        Command::Test { target } => test(target),
+        Command::PrePush => pre_push(),
     }
 }
