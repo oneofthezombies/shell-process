@@ -13,5 +13,5 @@ fn main() {
     new!("echo hello").run_with_config(&Config {
         prefix: String::from("🦀 $ "),
         ..Default::default()
-    })
+    });
 }
