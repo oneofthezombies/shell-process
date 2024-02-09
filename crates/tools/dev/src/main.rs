@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use sheller::Sheller;
-use std::panic;
+use std::{env, panic};
 
 #[derive(Parser)]
 #[command(arg_required_else_help = true)]
@@ -50,8 +50,18 @@ fn pre_push() {
     test(None);
 }
 
+/// During Github Actions Workflow, when running `rustup install nightly` inside a `cargo run --package tool-dev -- init` command on a Windows platform, it will fail with the following error:
+/// ```text
+/// error: could not create link from 'C:\Users\runneradmin\.cargo\bin\rustup.exe' to 'C:\Users\runneradmin\.cargo\bin\cargo.exe'
+/// ```
+///
+/// So for Github Action, I changed to call `rustup install nightly` before calling `cargo run --package tool-dev -- init`.
+/// Please see the workflow file at `.github/workflows/CI.yml`.
 fn init() {
-    Sheller::new("rustup install nightly").run();
+    if !env::var("GITHUB_ACTIONS").is_ok() {
+        Sheller::new("rustup install nightly").run();
+    }
+
     Sheller::new("rustup component add rustfmt clippy --toolchain nightly").run();
     Sheller::new("rustup override set nightly").run();
 }
