@@ -102,7 +102,7 @@ impl Default for Sheller {
         Self {
             program: parse_program(),
             args: DEFAULT_METADATA.args.into(),
-            script: "".into(),
+            script: String::new(),
         }
     }
 }
