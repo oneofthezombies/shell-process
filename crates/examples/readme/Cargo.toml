@@ -21,10 +21,6 @@ name = "try_run"
 path = "src/try_run.rs"
 
 [[bin]]
-name = "run_with_config"
-path = "src/run_with_config.rs"
-
-[[bin]]
 name = "builder"
 path = "src/builder.rs"
 

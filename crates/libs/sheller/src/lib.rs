@@ -1,37 +1,39 @@
+#![feature(exit_status_error)]
+
 use tracing::{debug, error, info};
 
 mod macros;
 
-/// Configuration for shell execution and error logging.
-///
-/// # Examples
-///
-/// initialize with default values:
-/// ```
-/// use sheller::Config;
-/// let config = Config::default();
-/// ```
-///
-/// initialize with custom values:
-/// ```rust
-/// use sheller::Config;
-/// let config = Config {
-///     prefix: "🦀 $ ".to_string(),
-///     ..Default::default()
-/// };
-pub struct Config {
-    pub prefix: String,
+#[derive(Debug)]
+pub enum Error {
+    Io(std::io::Error),
+    ProcessExitStatus(std::process::ExitStatusError),
 }
 
-static DEFAULT_PREFIX: &str = "🐚 $ ";
-
-impl Default for Config {
-    fn default() -> Self {
-        Config {
-            prefix: DEFAULT_PREFIX.into(),
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Error::Io(e) => write!(f, "I/O error: {e}"),
+            Error::ProcessExitStatus(e) => write!(f, "Process exit status error: {e}"),
         }
     }
 }
+
+impl std::error::Error for Error {}
+
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Error::Io(e)
+    }
+}
+
+impl From<std::process::ExitStatusError> for Error {
+    fn from(e: std::process::ExitStatusError) -> Self {
+        Error::ProcessExitStatus(e)
+    }
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 struct Metadata<'a> {
@@ -163,26 +165,7 @@ impl Sheller {
         self.build().run();
     }
 
-    /// Run the shell command with the given `config` and panic if the command failed to run.
-    ///
-    /// # Examples
-    /// ```
-    /// use sheller::{CommandExt, Config, Sheller};
-    ///
-    /// let config = Config {
-    ///     prefix: "🦀 $ ".to_string(),
-    ///     ..Default::default()
-    /// };
-    /// Sheller::new("echo hello").run_with_config(&config);
-    /// ```
-    ///
-    /// # Panics
-    /// Panics if the command failed to run.
-    pub fn run_with_config(self, config: &Config) {
-        self.build().run_with_config(config);
-    }
-
-    /// Run the shell command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    /// Run the shell command and return a `Result`.
     ///
     /// # Examples
     /// ```
@@ -193,29 +176,8 @@ impl Sheller {
     ///
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    pub fn try_run(self) -> Result<(), std::io::Error> {
+    pub fn try_run(self) -> Result<()> {
         self.build().try_run()
-    }
-
-    /// Run the shell command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
-    ///
-    /// # Examples
-    /// ```
-    /// use sheller::{CommandExt, Config, Sheller};
-    ///
-    /// let config = Config {
-    ///     prefix: "🦀 $ ".to_string(),
-    ///     ..Default::default()
-    /// };
-    /// Sheller::new("echo hello")
-    ///     .try_run_with_config(&config)
-    ///     .unwrap();
-    /// ```
-    ///
-    /// # Errors
-    /// Returns an `Err` if the command failed to run.
-    pub fn try_run_with_config(self, config: &Config) -> Result<(), std::io::Error> {
-        self.build().try_run_with_config(config)
     }
 }
 
@@ -246,42 +208,7 @@ pub trait CommandExt {
     /// Panics if the command failed to run.
     fn run(&mut self);
 
-    /// Run the command with the given `config` and panic if the command failed to run.
-    ///
-    /// # Examples
-    /// ```
-    /// use sheller::{CommandExt, Config};
-    /// use std::process::Command;
-    ///
-    /// #[cfg(windows)]
-    /// fn example() {
-    ///     let mut command = Command::new("cmd.exe");
-    ///     let config = Config {
-    ///         prefix: "🦀 $ ".to_string(),
-    ///         ..Default::default()
-    ///     };
-    ///     command
-    ///         .args(["/D", "/S", "/C", "echo hello"])
-    ///         .run_with_config(&config);
-    /// }
-    ///
-    /// #[cfg(unix)]
-    /// fn example() {
-    ///     let mut command = Command::new("echo");
-    ///     let config = Config {
-    ///         prefix: "🦀 $ ".to_string(),
-    ///         ..Default::default()
-    ///     };
-    ///     command.arg("hello").run_with_config(&config);
-    /// }
-    /// example();
-    /// ```
-    ///
-    /// # Panics
-    /// Panics if the command failed to run.
-    fn run_with_config(&mut self, config: &Config);
-
-    /// Run the command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
+    /// Run the command and return a `Result`.
     ///
     /// # Examples
     /// ```
@@ -308,44 +235,7 @@ pub trait CommandExt {
     ///
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    fn try_run(&mut self) -> Result<(), std::io::Error>;
-
-    /// Run the command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
-    ///
-    /// # Examples
-    /// ```
-    /// use sheller::{CommandExt, Config};
-    /// use std::process::Command;
-
-    /// #[cfg(windows)]
-    /// fn example() {
-    ///     let mut command = Command::new("cmd.exe");
-    ///     let config = Config {
-    ///         prefix: "🦀 $ ".to_string(),
-    ///         ..Default::default()
-    ///     };
-    ///     command
-    ///         .args(["/D", "/S", "/C", "echo hello"])
-    ///         .try_run_with_config(&config)
-    ///         .unwrap();
-    /// }
-    ///
-    /// #[cfg(unix)]
-    /// fn example() {
-    ///     let mut command = Command::new("echo");
-    ///     let config = Config {
-    ///         prefix: "🦀 $ ".to_string(),
-    ///         ..Default::default()
-    ///     };
-    ///     command.arg("hello").try_run_with_config(&config).unwrap();
-    /// }
-    ///
-    /// example();
-    /// ```
-    /// 
-    /// # Errors
-    /// Returns an `Err` if the command failed to run.
-    fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error>;
+    fn try_run(&mut self) -> Result<()>;
 }
 
 impl CommandExt for std::process::Command {
@@ -377,43 +267,6 @@ impl CommandExt for std::process::Command {
         self.try_run().unwrap();
     }
 
-    /// Run the command and panic if the command failed to run.
-    ///
-    /// # Examples
-    /// ```
-    /// use sheller::{CommandExt, Config};
-    /// use std::process::Command;
-    ///
-    /// #[cfg(windows)]
-    /// fn example() {
-    ///     let mut command = Command::new("cmd.exe");
-    ///     let config = Config {
-    ///         prefix: "🦀 $ ".to_string(),
-    ///         ..Default::default()
-    ///     };
-    ///     command
-    ///         .args(["/D", "/S", "/C", "echo hello"])
-    ///         .run_with_config(&config);
-    /// }
-    ///
-    /// #[cfg(unix)]
-    /// fn example() {
-    ///     let mut command = Command::new("echo");
-    ///     let config = Config {
-    ///         prefix: "🦀 $ ".to_string(),
-    ///         ..Default::default()
-    ///     };
-    ///     command.arg("hello").run_with_config(&config);
-    /// }
-    /// example();
-    /// ```
-    ///
-    /// # Panics
-    /// Panics if the command failed to run.
-    fn run_with_config(&mut self, config: &Config) {
-        self.try_run_with_config(config).unwrap();
-    }
-
     /// Run the command and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
     ///
     /// # Examples
@@ -441,73 +294,25 @@ impl CommandExt for std::process::Command {
     ///
     /// # Errors
     /// Returns an `Err` if the command failed to run.
-    fn try_run(&mut self) -> Result<(), std::io::Error> {
-        self.try_run_with_config(&Config::default())
-    }
-
-    /// Run the command with the given `config` and return a `Result` with `Ok` if the command was successful, and `Err` if the command failed.
-    ///
-    /// # Examples
-    /// ```
-    /// use sheller::{CommandExt, Config};
-    /// use std::process::Command;
-    ///
-    /// #[cfg(windows)]
-    /// fn example() {
-    ///     let mut command = Command::new("cmd.exe");
-    ///     let config = Config {
-    ///         prefix: "🦀 $ ".to_string(),
-    ///         ..Default::default()
-    ///     };
-    ///     command
-    ///         .args(["/D", "/S", "/C", "echo hello"])
-    ///         .try_run_with_config(&config)
-    ///         .unwrap();
-    /// }
-    ///
-    /// #[cfg(unix)]
-    /// fn example() {
-    ///     let mut command = Command::new("echo");
-    ///     let config = Config {
-    ///         prefix: "🦀 $ ".to_string(),
-    ///         ..Default::default()
-    ///     };
-    ///     command.arg("hello").try_run_with_config(&config).unwrap();
-    /// }
-    ///
-    /// example();
-    /// ```
-    ///
-    /// # Errors
-    /// Returns an `Err` if the command failed to run.
-    fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error> {
-        let Config { prefix } = config;
-        info!(command = ?self, "{prefix}Running command.");
+    fn try_run(&mut self) -> Result<()> {
+        info!(command = ?self, "Running command.");
         let mut command = self.spawn().map_err(|e| {
-            error!(command = ?self, error = ?e, "{prefix}Failed to spawn command.");
+            error!(command = ?self, error = ?e, "Failed to spawn command.");
             e
         })?;
         let status = command.wait().map_err(|e| {
-            error!(command = ?self, error = ?e, "{prefix}Failed to wait for command.");
+            error!(command = ?self, error = ?e, "Failed to wait for command.");
             e
         })?;
-        if !status.success() {
-            let message = format!("Failed to run command: {self:?} with status: {status:?}");
-            error!(command = ?self, status = ?status, "{prefix}Failed to run command.");
-            return Err(std::io::Error::new(std::io::ErrorKind::Other, message));
+        match status.exit_ok() {
+            Ok(()) => {
+                info!(command = ?self, "Succeeded to run command.");
+                Ok(())
+            }
+            Err(e) => {
+                error!(command = ?self, error = ?e, "Failed to run command.");
+                Err(e.into())
+            }
         }
-        Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn default_prefix() {
-        let config = Config::default();
-        assert_eq!(config.prefix, DEFAULT_PREFIX);
-        assert_eq!(config.prefix, "🐚 $ ");
     }
 }

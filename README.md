@@ -81,13 +81,13 @@ fn main() {
 }
 ```
 
-If you don't want `panic`, you can use the `try_run` methods to receive and process `std::io::Result<()>`.  
+If you don't want `panic`, you can use the `try_run` methods to receive and process `sheller::Result<()>`.  
 
 ```rust
 // crates/examples/readme/src/try_run.rs
 use sheller::try_run;
 
-fn main() -> std::io::Result<()> {
+fn main() -> sheller::Result<()> {
     try_run!("echo hello")
 }
 ```
@@ -129,34 +129,6 @@ fn init_log() {
 
 👀 For more information on how to use tracing, please check the [tracing documentation](https://docs.rs/tracing/latest/tracing/index.html).
 
-`run` and `try_run` use default configurations.  
-Configuration has the values `prefix`.  
-The default value for `prefix` is `"🐚 $ "`.  
-`prefix` is a symbol attached to the front of the message of the tracing event left by the sheller.  
-
-If you want to change the configurations, please follow the example below.  
-
-```rust
-// crates/examples/readme/src/run_with_config.rs
-use sheller::{new, Config};
-
-fn main() {
-    // binding to variable
-    let config = Config {
-        prefix: String::from("🦀 $ "),
-    };
-    new!("echo hello").run_with_config(&config);
-
-    // without binding to variable
-    new!("echo hello").run_with_config(&Config {
-        prefix: String::from("🦀 $ "),
-    });
-}
-```
-
-The `Sheller::run_with_config` method generates `panic` of the command failes.  
-If you do not want `panic` to occur, please use `Sheller::try_run_with_config` to process `std::io::Result<()>`.  
-
 `Sheller` uses `std::process::Command`.  
 If you want to change the current working path, stdout/stderr or environment variables, use the `Sheller::build` method.  
 This method returns `std::process::Command`.  
@@ -175,12 +147,12 @@ fn main() {
 }
 ```
 
-Likewise, `run`, `run_with_config`, `try_run` and `try_run_with_config` can all be used.  
+Likewise, `run` and `try_run` can all be used.  
 
 In addition to the four methods above, you can of course also use the Rust official `std::process::Command` methods.  
 For more information about `std::process::Command`, please check [the Rust official page](https://doc.rust-lang.org/std/process/struct.Command.html).  
 
-The `run`, `run_with_config`, `try_run`, and `try_run_with_config` methods are implemented as `CommandExt`.  
+The `run` and `try_run` methods are implemented as `CommandExt`.  
 The purpose of these methods is utility.  
 So you don't necessarily have to use `Sheller`.  
 
