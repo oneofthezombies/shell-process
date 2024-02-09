@@ -1,3 +1,16 @@
+/// Sheller macro to run a shell script.  
+/// It will panic if the script fails.
+///
+/// # Examples
+///
+/// ```
+/// use sheller::run;
+///
+/// run!("echo hello");
+/// run!("{}", "echo hello");
+/// run!("echo {}", "hello");
+/// run!("echo {hello}", hello = "hello");
+/// run!("echo {} {world}", "hello", world = "world");
 #[macro_export]
 macro_rules! run {
     ($script_fmt:expr) => {
@@ -8,6 +21,19 @@ macro_rules! run {
     };
 }
 
+/// Sheller macro to try to run a shell script.  
+/// It will return a `Result`. If the script fails, it will return an `Err`. Otherwise, it will return an `Ok`.  
+///
+/// # Examples
+///
+/// ```
+/// use sheller::try_run;
+///
+/// try_run!("echo hello").unwrap();
+/// try_run!("{}", "echo hello").unwrap();
+/// try_run!("echo {}", "hello").unwrap();
+/// try_run!("echo {hello}", hello = "hello").unwrap();
+/// try_run!("echo {} {world}", "hello", world = "world").unwrap();
 #[macro_export]
 macro_rules! try_run {
     ($script_fmt:expr) => {{
