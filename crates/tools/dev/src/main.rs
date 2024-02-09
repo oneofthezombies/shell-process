@@ -73,7 +73,7 @@ fn init(target: Option<String>) {
         remove_file_force(format!("{home}/.cargo/bin/rust-analyzer.exe"));
         remove_file_force(format!("{home}/.cargo/bin/rustfmt.exe"));
         remove_file_force(format!("{home}/.cargo/bin/cargo-fmt.exe"));
-        Sheller::new("rustup self update").run();
+        Sheller::new("rustup update").run();
     }
 
     Sheller::new("rustup install nightly").run();
