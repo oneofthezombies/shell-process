@@ -65,7 +65,18 @@ fn init() {
     run!("rustup override set nightly");
 }
 
+fn init_log() {
+    tracing::subscriber::set_global_default(
+        tracing_subscriber::FmtSubscriber::builder()
+            .with_max_level(tracing::Level::TRACE)
+            .finish(),
+    )
+    .expect("setting default subscriber failed");
+}
+
 fn main() {
+    init_log();
+
     let cli = Cli::parse();
     match cli.command {
         Some(Command::Init) => init(),
