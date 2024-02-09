@@ -51,6 +51,7 @@ fn pre_push() {
 }
 
 fn init() {
+    Sheller::new("rustup install nightly").run();
     Sheller::new("rustup component add rustfmt clippy --toolchain nightly").run();
     Sheller::new("rustup override set nightly").run();
 }
