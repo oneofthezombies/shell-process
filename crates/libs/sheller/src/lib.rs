@@ -482,18 +482,18 @@ impl CommandExt for std::process::Command {
     /// Returns an `Err` if the command failed to run.
     fn try_run_with_config(&mut self, config: &Config) -> Result<(), std::io::Error> {
         let Config { prefix } = config;
-        info!(command = ?self, "{prefix}Running command");
+        info!(command = ?self, "{prefix}Running command.");
         let mut command = self.spawn().map_err(|e| {
-            error!(command = ?self, error = ?e, "{prefix}Failed to spawn command");
+            error!(command = ?self, error = ?e, "{prefix}Failed to spawn command.");
             e
         })?;
         let status = command.wait().map_err(|e| {
-            error!(command = ?self, error = ?e, "{prefix}Failed to wait for command");
+            error!(command = ?self, error = ?e, "{prefix}Failed to wait for command.");
             e
         })?;
         if !status.success() {
             let message = format!("Failed to run command: {self:?} with status: {status:?}");
-            error!(command = ?self, status = ?status, "{prefix}Failed to run command");
+            error!(command = ?self, status = ?status, "{prefix}Failed to run command.");
             return Err(std::io::Error::new(std::io::ErrorKind::Other, message));
         }
         Ok(())

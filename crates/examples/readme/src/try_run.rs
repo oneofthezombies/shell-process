@@ -2,6 +2,5 @@
 use sheller::try_run;
 
 fn main() -> std::io::Result<()> {
-    try_run!("echo hello")?;
-    Ok(())
+    try_run!("echo hello")
 }

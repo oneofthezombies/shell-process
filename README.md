@@ -76,8 +76,7 @@ use sheller::run;
 
 fn main() {
     run!("echo hello");
-    // The log below is output to stdout.
-    // 🐚 $ Running command: "/bin/bash" "-c" "echo hello"
+    // It will be printed as below, or panicked.
     // hello
 }
 ```
@@ -89,16 +88,51 @@ If you don't want `panic`, you can use the `try_run` methods to receive and proc
 use sheller::try_run;
 
 fn main() -> std::io::Result<()> {
-    try_run!("echo hello")?;
-    Ok(())
+    try_run!("echo hello")
 }
 ```
 
+📢 If you want output of which command line is executed, add the [tracing](https://github.com/tokio-rs/tracing) to your dependencies.  
+Sheller internally uses `tracing`, a pupular centralized structured logging system.  
+
+Below is an example using `tracing`.
+
+```toml
+# Cargo.toml
+[dependencies]
+tracing = "0.1"
+tracing-subscriber = "0.3"
+```
+
+```rust
+// crates/examples/readme/src/run_with_log.rs
+use sheller::run;
+
+fn main() {
+    init_log();
+
+    run!("echo hello");
+    // It will be printed as below, or panicked.
+    // 2024-02-09T16:03:57.463018Z  INFO sheller: 🐚 $ Running command. command="/bin/bash" "-c" "echo hello"
+    // hello
+}
+
+fn init_log() {
+    tracing::subscriber::set_global_default(
+        tracing_subscriber::FmtSubscriber::builder()
+            .with_max_level(tracing::Level::TRACE)
+            .finish(),
+    )
+    .expect("setting default subscriber failed");
+}
+```
+
+👀 For more information on how to use tracing, please check the [tracing documentation](https://docs.rs/tracing/latest/tracing/index.html).
+
 `run` and `try_run` use default configurations.  
-Configuration has the values `prefix` and `writer`.  
+Configuration has the values `prefix`.  
 The default value for `prefix` is `"🐚 $ "`.  
-The default value for `writer` is `std::sync::Mutex::new(Box::new(std::io::stdout()))`.  
-This `prefix` and `writer` are used to print which command is executed before actually running, or which command is called when an error occurs.  
+`prefix` is a symbol attached to the front of the message of the tracing event left by the sheller.  
 
 If you want to change the configurations, please follow the example below.  
 
@@ -109,16 +143,14 @@ use sheller::{new, Config};
 fn main() {
     // binding to variable
     let config = Config {
-        prefix: "🦀 $ ".to_string(),
-        ..Default::default()
+        prefix: String::from("🦀 $ "),
     };
     new!("echo hello").run_with_config(&config);
 
     // without binding to variable
     new!("echo hello").run_with_config(&Config {
         prefix: String::from("🦀 $ "),
-        ..Default::default()
-    })
+    });
 }
 ```
 

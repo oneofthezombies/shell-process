@@ -5,10 +5,16 @@ edition.workspace = true
 
 [dependencies]
 sheller = { path = "../../libs/sheller" }
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
 
 [[bin]]
 name = "run"
 path = "src/run.rs"
+
+[[bin]]
+name = "run_with_log"
+path = "src/run_with_log.rs"
 
 [[bin]]
 name = "try_run"

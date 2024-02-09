@@ -4,7 +4,7 @@ use sheller::{new, Config};
 fn main() {
     // binding to variable
     let config = Config {
-        prefix: "🦀 $ ".to_string(),
+        prefix: String::from("🦀 $ "),
     };
     new!("echo hello").run_with_config(&config);
 

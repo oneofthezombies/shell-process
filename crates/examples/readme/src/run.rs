@@ -3,7 +3,6 @@ use sheller::run;
 
 fn main() {
     run!("echo hello");
-    // The log below is output to stdout.
-    // 🐚 $ Running command: "/bin/bash" "-c" "echo hello"
+    // It will be printed as below, or panicked.
     // hello
 }
