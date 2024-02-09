@@ -63,7 +63,7 @@ Add `sheller` to your dependencies.
 ```toml
 # Cargo.toml
 [dependencies]
-sheller = "0.2"
+sheller = "0.3"
 ```
 
 Below are examples using `sheller`.  
