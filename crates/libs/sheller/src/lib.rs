@@ -319,14 +319,12 @@ impl CommandExt for std::process::Command {
                 error!(command = ?self, exit_code = ?exit_code, "Failed to run command with non-zero exit code.");
                 Err(Error::ExitCode(exit_code))
             }
+        } else if let Some(signal) = get_signal(status) {
+            error!(command = ?self, signal = ?signal, "Failed to run command with signal.");
+            Err(Error::Signal(signal))
         } else {
-            if let Some(signal) = get_signal(status) {
-                error!(command = ?self, signal = ?signal, "Failed to run command with signal.");
-                Err(Error::Signal(signal))
-            } else {
-                error!(command = ?self, "Failed to run command with no exit code and signal.");
-                Err(Error::NoExitCodeAndSignal)
-            }
+            error!(command = ?self, "Failed to run command with no exit code and signal.");
+            Err(Error::NoExitCodeAndSignal)
         }
     }
 }
