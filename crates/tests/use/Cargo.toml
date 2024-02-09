@@ -1,5 +1,5 @@
 [package]
-name = "test-default"
+name = "test-use"
 version = "0.0.0"
 edition.workspace = true
 

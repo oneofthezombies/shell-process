@@ -1,0 +1,27 @@
+[package]
+name = "example-readme"
+version = "0.0.0"
+edition.workspace = true
+
+[dependencies]
+sheller = { path = "../../libs/sheller" }
+
+[[bin]]
+name = "run"
+path = "src/run.rs"
+
+[[bin]]
+name = "try_run"
+path = "src/try_run.rs"
+
+[[bin]]
+name = "run_with_config"
+path = "src/run_with_config.rs"
+
+[[bin]]
+name = "builder"
+path = "src/builder.rs"
+
+[[bin]]
+name = "command_ext"
+path = "src/command_ext.rs"

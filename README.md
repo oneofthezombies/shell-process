@@ -68,31 +68,30 @@ sheller = "0.2"
 
 Below are examples using `sheller`.  
 
-⚠️ If you don't see the `run` method, check `use sheller::CommandExt`.  
-
 If you simply want to run a shell script, use it as follows.  
 
 ```rust
-use sheller::{CommandExt, Sheller};
+// crates/examples/readme/src/run.rs
+use sheller::run;
 
-Sheller::new("echo hello").run();
-// The log below is output to stdout.
-// 🐚 $ Running command: "/bin/bash" "-c" "echo hello"
-// hello
+fn main() {
+    run!("echo hello");
+    // The log below is output to stdout.
+    // 🐚 $ Running command: "/bin/bash" "-c" "echo hello"
+    // hello
+}
 ```
 
-If you don't want `panic`, you can use the `Sheller::try_run` methods to receive and process `std::io::Result<()>`.  
+If you don't want `panic`, you can use the `try_run` methods to receive and process `std::io::Result<()>`.  
 
 ```rust
-use sheller::{CommandExt, Sheller};
+// crates/examples/readme/src/try_run.rs
+use sheller::try_run;
 
-// if the function returns std::io::Result<T>
-Sheller::new("echo hello").try_run()?
-
-// if the function does not return NOT std::io::Result<T>
-Sheller::new("echo hello").try_run().map_err(|e| {
-    // transform error
-})?;
+fn main() -> std::io::Result<()> {
+    try_run!("echo hello")?;
+    Ok(())
+}
 ```
 
 `run` and `try_run` use default configurations.  
@@ -104,20 +103,23 @@ This `prefix` and `writer` are used to print which command is executed before ac
 If you want to change the configurations, please follow the example below.  
 
 ```rust
-use sheller::{CommandExt, Config, Sheller};
+// crates/examples/readme/src/run_with_config.rs
+use sheller::{new, Config};
 
-// binding to variable 
-let config = Config {
-    prefix: "🦀 $ ".to_string(),
-    ..Default::default()
-};
-Sheller::new("echo hello").run_with_config(&config);
+fn main() {
+    // binding to variable
+    let config = Config {
+        prefix: "🦀 $ ".to_string(),
+        ..Default::default()
+    };
+    new!("echo hello").run_with_config(&config);
 
-// without binding to variable
-Sheller::new("echo hello").run_with_config(&Config {
-    prefix: "🦀 $ ".to_string(),
-    ..Default::default()
-});
+    // without binding to variable
+    new!("echo hello").run_with_config(&Config {
+        prefix: String::from("🦀 $ "),
+        ..Default::default()
+    })
+}
 ```
 
 The `Sheller::run_with_config` method generates `panic` of the command failes.  
@@ -129,11 +131,16 @@ This method returns `std::process::Command`.
 
 Below is an example of changing the current working path.  
 
-```rust
-use sheller::{CommandExt, Sheller};
+⚠️ If you don't see the `run` method, check `use sheller::CommandExt`.  
 
-let mut command = Sheller::new("echo hello").build();
-command.current_dir("/my/dir").run();
+```rust
+// crates/examples/readme/src/builder.rs
+use sheller::{new, CommandExt};
+
+fn main() {
+    let mut command = new!("echo hello").build();
+    command.current_dir("/my/dir").run();
+}
 ```
 
 Likewise, `run`, `run_with_config`, `try_run` and `try_run_with_config` can all be used.  
@@ -148,10 +155,13 @@ So you don't necessarily have to use `Sheller`.
 Below is an example that uses only `CommandExt` without using `Sheller`.  
 
 ```rust
+// crates/examples/readme/src/command_ext.rs
 use sheller::CommandExt;
 
-let mut command = std::process::Command::new("echo");
-command.arg("hello").run();
+fn main() {
+    let mut command = std::process::Command::new("echo");
+    command.arg("hello").run();
+}
 ```
 
 ## Internal Implementation
