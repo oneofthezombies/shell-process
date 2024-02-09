@@ -1,5 +1,3 @@
-#![feature(exit_status_error)]
-
 use tracing::{debug, error, info};
 
 mod macros;
@@ -7,14 +5,18 @@ mod macros;
 #[derive(Debug)]
 pub enum Error {
     Io(std::io::Error),
-    ProcessExitStatus(std::process::ExitStatusError),
+    ExitCode(i32),
+    Signal(i32),
+    NoExitCodeAndSignal,
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Error::Io(e) => write!(f, "I/O error: {e}"),
-            Error::ProcessExitStatus(e) => write!(f, "Process exit status error: {e}"),
+            Error::ExitCode(exit_code) => write!(f, "Exit code: {exit_code}"),
+            Error::Signal(signal) => write!(f, "Signal: {signal}"),
+            Error::NoExitCodeAndSignal => write!(f, "No exit code and signal"),
         }
     }
 }
@@ -24,12 +26,6 @@ impl std::error::Error for Error {}
 impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
         Error::Io(e)
-    }
-}
-
-impl From<std::process::ExitStatusError> for Error {
-    fn from(e: std::process::ExitStatusError) -> Self {
-        Error::ProcessExitStatus(e)
     }
 }
 
@@ -238,6 +234,17 @@ pub trait CommandExt {
     fn try_run(&mut self) -> Result<()>;
 }
 
+#[cfg(unix)]
+fn get_signal(a: std::process::ExitStatus) -> Option<i32> {
+    use std::os::unix::process::ExitStatusExt;
+    a.signal()
+}
+
+#[cfg(windows)]
+fn get_signal(_: std::process::ExitStatus) -> Option<i32> {
+    None
+}
+
 impl CommandExt for std::process::Command {
     /// Run the command and panic if the command failed to run.
     ///
@@ -304,14 +311,21 @@ impl CommandExt for std::process::Command {
             error!(command = ?self, error = ?e, "Failed to wait for command.");
             e
         })?;
-        match status.exit_ok() {
-            Ok(()) => {
-                info!(command = ?self, "Succeeded to run command.");
+        if let Some(exit_code) = status.code() {
+            if exit_code == 0 {
+                info!(command = ?self, "Succeeded to run command with zero exit code.");
                 Ok(())
+            } else {
+                error!(command = ?self, exit_code = ?exit_code, "Failed to run command with non-zero exit code.");
+                Err(Error::ExitCode(exit_code))
             }
-            Err(e) => {
-                error!(command = ?self, error = ?e, "Failed to run command.");
-                Err(e.into())
+        } else {
+            if let Some(signal) = get_signal(status) {
+                error!(command = ?self, signal = ?signal, "Failed to run command with signal.");
+                Err(Error::Signal(signal))
+            } else {
+                error!(command = ?self, "Failed to run command with no exit code and signal.");
+                Err(Error::NoExitCodeAndSignal)
             }
         }
     }
