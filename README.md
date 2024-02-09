@@ -149,7 +149,7 @@ fn main() {
 
 Likewise, `run` and `try_run` can all be used.  
 
-In addition to the four methods above, you can of course also use the Rust official `std::process::Command` methods.  
+In addition to the methods above, you can of course also use the Rust official `std::process::Command` methods.  
 For more information about `std::process::Command`, please check [the Rust official page](https://doc.rust-lang.org/std/process/struct.Command.html).  
 
 The `run` and `try_run` methods are implemented as `CommandExt`.  
