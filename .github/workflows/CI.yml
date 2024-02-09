@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Init
-      run: cargo run --package tool-dev -- init --target ${{ matrix.target }}
+      run: cargo run --package tool-dev -- init
     - name: Check
       run: cargo run --package tool-dev -- check
     - name: Clippy
