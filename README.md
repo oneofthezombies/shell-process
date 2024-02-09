@@ -10,7 +10,16 @@
 [crates-badge]: https://img.shields.io/crates/v/sheller.svg
 [crates-url]: https://crates.io/crates/sheller
 
-## Why I Made This
+## Why I Created This
+
+### TL;DR  
+
+---
+
+I created it because I want to call `npm install` from Rust on multiplatforms.  
+(`npm` is installed with the file name `npm.cmd` on Windows platforms. and Rust `std::process::Command` does not support PATHEXT-based executable search like `cmd.exe`, `pwsh.exe` or `go`)
+
+--- 
 
 I use Rust to write utility functions for managing Rust library and application projects.  
 For example, calling `cargo clippy -- -D clippy::all -D clippy::pedantic`.  
@@ -164,6 +173,24 @@ fn main() {
 ```
 
 Likewise, `run` and `try_run` can all be used.  
+
+If you want to pipe stdout, please see the example below.  
+
+```rust
+// crates/examples/readme/src/pipe.rs
+use sheller::new;
+
+static EOL: &str = if cfg!(windows) { "\r\n" } else { "\n" };
+
+fn main() {
+    let output = new!("echo hello")
+        .build()
+        .stdout(std::process::Stdio::piped())
+        .output()
+        .unwrap();
+    assert_eq!(output.stdout, format!("hello{}", EOL).as_bytes());
+}
+```
 
 In addition to the methods above, you can of course also use the Rust official `std::process::Command` methods.  
 For more information about `std::process::Command`, please check [the Rust official page](https://doc.rust-lang.org/std/process/struct.Command.html).  

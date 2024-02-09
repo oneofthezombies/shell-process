@@ -27,3 +27,7 @@ path = "src/builder.rs"
 [[bin]]
 name = "command_ext"
 path = "src/command_ext.rs"
+
+[[bin]]
+name = "pipe"
+path = "src/pipe.rs"
