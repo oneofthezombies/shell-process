@@ -8,6 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
 
 jobs:
   lint-test:
@@ -26,7 +27,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Init
-      run: cargo run --package tool-dev -- init
+      run: cargo run --package tool-dev -- init --target ${{ matrix.target }}
     - name: Check
       run: cargo run --package tool-dev -- check
     - name: Clippy

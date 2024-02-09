@@ -11,7 +11,10 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    Init,
+    Init {
+        #[arg(short, long)]
+        target: Option<String>,
+    },
     Check,
     Clippy,
     Fmt,
@@ -50,16 +53,21 @@ fn pre_push() {
     test(None);
 }
 
-fn init() {
+fn init(target: Option<String>) {
     Sheller::new("rustup install nightly").run();
     Sheller::new("rustup component add rustfmt --toolchain nightly").run();
     Sheller::new("rustup override set nightly").run();
+
+    if let Some(target) = target {
+        Sheller::new(format!("rustup component add clippy --toolchain nightly-{target}").as_str())
+            .run();
+    };
 }
 
 fn main() {
     let cli = Cli::parse();
     match cli.command {
-        Some(Command::Init) => init(),
+        Some(Command::Init { target }) => init(target),
         Some(Command::Check) => check(),
         Some(Command::Clippy) => clippy(),
         Some(Command::Fmt) => fmt(),
