@@ -112,9 +112,9 @@ fn main() {
     init_log();
 
     run!("echo hello");
-    // It will be printed as below, or panicked.
-    // 2024-02-09T16:03:57.463018Z  INFO sheller: 🐚 $ Running command. command="/bin/bash" "-c" "echo hello"
+    // 2024-02-09T19:11:29.897389Z  INFO sheller: Running command. command="/bin/bash" "-c" "echo hello"
     // hello
+    // 2024-02-09T19:11:29.898254Z  INFO sheller: Succeeded to run command with zero exit code. command="/bin/bash" "-c" "echo hello"
 }
 
 fn init_log() {
