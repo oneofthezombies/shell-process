@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use sheller::Sheller;
+use sheller::run;
 use std::{env, panic};
 
 #[derive(Parser)]
@@ -23,24 +23,24 @@ enum Command {
 }
 
 fn check() {
-    Sheller::new("cargo check --workspace").run();
+    run!("cargo check --workspace");
 }
 
 fn clippy() {
-    Sheller::new("cargo clippy -- -D clippy::all -D clippy::pedantic").run();
+    run!("cargo clippy -- -D clippy::all -D clippy::pedantic");
 }
 
 fn fmt() {
-    Sheller::new("cargo fmt -- --check").run();
+    run!("cargo fmt -- --check");
 }
 
 fn test(target: Option<String>) {
     let Some(target) = target else {
-        Sheller::new("cargo test --workspace").run();
+        run!("cargo test --workspace");
         return;
     };
 
-    Sheller::new(format!("cargo test --target {target}").as_str()).run();
+    run!("cargo test --target {target}");
 }
 
 fn pre_push() {
@@ -54,16 +54,15 @@ fn pre_push() {
 /// ```text
 /// error: could not create link from 'C:\Users\runneradmin\.cargo\bin\rustup.exe' to 'C:\Users\runneradmin\.cargo\bin\cargo.exe'
 /// ```
-///
 /// So for Github Action, I changed to call `rustup install nightly` before calling `cargo run --package tool-dev -- init`.
 /// Please see the workflow file at `.github/workflows/CI.yml`.
 fn init() {
     if env::var("GITHUB_ACTIONS").is_err() {
-        Sheller::new("rustup install nightly").run();
+        run!("rustup install nightly");
     }
 
-    Sheller::new("rustup component add rustfmt clippy --toolchain nightly").run();
-    Sheller::new("rustup override set nightly").run();
+    run!("rustup component add rustfmt clippy --toolchain nightly");
+    run!("rustup override set nightly");
 }
 
 fn main() {

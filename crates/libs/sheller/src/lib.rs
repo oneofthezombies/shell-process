@@ -3,6 +3,8 @@ extern crate lazy_static;
 
 use tracing::debug;
 
+mod macros;
+
 lazy_static! {
     static ref GLOBAL_CONFIG: Config = Config::default();
 }
@@ -89,23 +91,23 @@ fn parse_program() -> String {
 ///
 /// Please see the `Sheller::new` method for more information.
 #[derive(Debug)]
-pub struct Sheller<'a> {
+pub struct Sheller {
     program: String,
-    args: Vec<&'a str>,
-    script: &'a str,
+    args: Vec<&'static str>,
+    script: String,
 }
 
-impl Default for Sheller<'_> {
+impl Default for Sheller {
     fn default() -> Self {
         Self {
             program: parse_program(),
-            args: DEFAULT_METADATA.args.to_vec(),
-            script: "",
+            args: DEFAULT_METADATA.args.into(),
+            script: "".into(),
         }
     }
 }
 
-impl<'a> Sheller<'a> {
+impl Sheller {
     /// Create a new `Sheller` with the given `script` and platform-specific defaults.
     ///
     /// # Platform-specific defaults
@@ -139,9 +141,12 @@ impl<'a> Sheller<'a> {
     /// assert!(command.status().unwrap().success());
     /// ```
     #[must_use]
-    pub fn new(script: &'a str) -> Self {
+    pub fn new<T>(script: T) -> Self
+    where
+        T: Into<String>,
+    {
         Self {
-            script,
+            script: script.into(),
             ..Default::default()
         }
     }
