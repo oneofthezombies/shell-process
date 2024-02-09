@@ -9,5 +9,5 @@ fn main() {
         .stdout(std::process::Stdio::piped())
         .output()
         .unwrap();
-    assert_eq!(output.stdout, format!("hello{}", EOL).as_bytes());
+    assert_eq!(output.stdout, format!("hello{EOL}").as_bytes());
 }
