@@ -2,6 +2,8 @@
 
 🐚 Sheller is a shell command builder and standard command extension library written in Rust.  
 
+I would really APPRECIATE it if you could star(⭐) this repository! [Click to jump to the repository.](https://github.com/oneofthezombies/sheller)  
+
 [![Build Status][actions-badge]][actions-url]
 [![Crates.io][crates-badge]][crates-url]
 
